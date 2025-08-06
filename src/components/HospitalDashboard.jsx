@@ -6,7 +6,7 @@ export default function HospitalDashboard() {
   const [waitTime, setWaitTime] = useState(0);
 
   useEffect(() => {
-    fetch("/api/hospitals/status")
+    fetch("https://pguh.onrender.com/api/hospitals/status")
       .then((res) => res.json())
       .then((data) => {
         const hosp = data.find((h) => h.id === hospitalId);
@@ -18,7 +18,7 @@ export default function HospitalDashboard() {
   }, [hospitalId]);
 
   const saveWaitTime = () => {
-    fetch("/api/hospitals/waittime", {
+    fetch("https://pguh.onrender.com/api/hospitals/waittime", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

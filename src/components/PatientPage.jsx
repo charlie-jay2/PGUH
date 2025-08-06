@@ -6,7 +6,7 @@ export default function PatientPage({ patientId }) {
   const [newLog, setNewLog] = useState("");
 
   useEffect(() => {
-    fetch(`/api/patients/${patientId}`)
+    fetch(`https://pguh.onrender.com/api/patients/${patientId}`)
       .then((res) => res.json())
       .then((data) => {
         setPatient(data.patient);
@@ -17,7 +17,7 @@ export default function PatientPage({ patientId }) {
   const addLog = () => {
     if (newLog.trim() === "") return alert("Log text required");
 
-    fetch(`/api/patients/${patientId}/logs`, {
+    fetch(`https://pguh.onrender.com/api/patients/${patientId}/logs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ log_text: newLog }),

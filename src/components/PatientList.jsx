@@ -6,7 +6,7 @@ export default function PatientList() {
   const hospitalId = "67f5356c-5e15-4139-8b95-b9b9d8fdbf16"; // Filter patients by hospital
 
   useEffect(() => {
-    fetch("/api/patients") // You'll need to create this endpoint or fetch all and filter
+    fetch("https://pguh.onrender.com/api/patients") // You'll need to create this endpoint or fetch all and filter
       .then((res) => res.json())
       .then((data) => {
         const filtered = data.filter((p) => p.hospital_id === hospitalId);
