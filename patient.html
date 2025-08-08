@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Patient Details — NHS Staff Portal</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <a href="index.html" style="color: inherit; text-decoration: none"
+          >NHS Staff Portal</a
+        >
+      </div>
+      <div class="meta" id="metaArea"></div>
+    </header>
+
+    <main class="container" id="mainContainer">
+      <section id="patientDetails" class="panel">
+        <h2 id="patientName">Loading...</h2>
+
+        <div>
+          <p><strong>Patient ID:</strong> <span id="patientId"></span></p>
+          <p><strong>Age:</strong> <span id="patientAge"></span></p>
+          <p><strong>Ward:</strong> <span id="patientWard"></span></p>
+          <p><strong>Notes:</strong> <span id="patientNotes"></span></p>
+        </div>
+
+        <h3>Medical History</h3>
+        <ul id="medicalHistoryList"></ul>
+
+        <h3>Add Clinical Information</h3>
+        <form id="clinicalInfoForm" class="form">
+          <label
+            >Triage Information:<br />
+            <textarea id="inputTriage" rows="3"></textarea></label
+          ><br />
+          <label
+            >Primary Survey:<br />
+            <textarea id="inputPrimarySurvey" rows="3"></textarea></label
+          ><br />
+          <label
+            >NEWS 2 Record:<br />
+            <textarea id="inputNews2" rows="3"></textarea></label
+          ><br />
+          <div class="form-actions">
+            <button id="saveClinicalBtn" type="button">
+              Save Clinical Info
+            </button>
+          </div>
+        </form>
+
+        <div id="statusMsg"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Copyright 2025 © Prince Georges University Hospital
+    </footer>
+
+    <script src="app.js"></script>
+
+    <script>
+      // API helpers for patient data
+      window.api = {
+        async getPatient(id, token) {
+          const res = await fetch(
+            `/.netlify/functions/getPatientById?id=${id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!res.ok) {
+            throw new Error(`Error fetching patient: ${res.statusText}`);
+          }
+          return res.json();
+        },
+
+        async addPatientRecord(id, record, token) {
+          const res = await fetch(`/.netlify/functions/addPatientRecord`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id, ...record }),
+          });
+          if (!res.ok) {
+            throw new Error(`Error saving clinical record: ${res.statusText}`);
+          }
+          return res.json();
+        },
+      };
+
+      // On page load:
+      (async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Please log in first");
+          window.location.href = "index.html";
+          return;
+        }
+
+        const metaArea = document.getElementById("metaArea");
+        metaArea.textContent = `Logged in as ${localStorage.getItem(
+          "username"
+        )}`;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const patientId = urlParams.get("id");
+        if (!patientId) {
+          alert("No patient ID provided");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Fetch patient data
+        let patient;
+        try {
+          patient = await window.api.getPatient(patientId, token);
+        } catch (e) {
+          alert("Failed to load patient: " + e.message);
+          window.location.href = "index.html";
+          return;
+        }
+
+        document.getElementById("patientName").textContent = patient.name;
+        document.getElementById("patientId").textContent =
+          patient.patientId || "—";
+        document.getElementById("patientAge").textContent = patient.age || "—";
+        document.getElementById("patientWard").textContent =
+          patient.ward || "—";
+        document.getElementById("patientNotes").textContent =
+          patient.notes || "—";
+
+        // Medical history
+        const histList = document.getElementById("medicalHistoryList");
+        histList.innerHTML = "";
+        (patient.medicalHistory || []).forEach((item) => {
+          // Each item may be an object with triage, primarySurvey, news2Record, createdAt fields.
+          // Format nicely:
+          const li = document.createElement("li");
+          let text = "";
+          if (typeof item === "string") {
+            text = item;
+          } else {
+            if (item.createdAt)
+              text += `Date: ${new Date(item.createdAt).toLocaleString()}\n`;
+            if (item.triage) text += `Triage: ${item.triage}\n`;
+            if (item.primarySurvey)
+              text += `Primary Survey: ${item.primarySurvey}\n`;
+            if (item.news2Record) text += `NEWS 2: ${item.news2Record}`;
+          }
+          li.textContent = text;
+          histList.appendChild(li);
+        });
+
+        // Save clinical info button
+        document.getElementById("saveClinicalBtn").onclick = async () => {
+          const triage = document.getElementById("inputTriage").value.trim();
+          const primarySurvey = document
+            .getElementById("inputPrimarySurvey")
+            .value.trim();
+          const news2Record = document
+            .getElementById("inputNews2")
+            .value.trim();
+
+          if (!triage && !primarySurvey && !news2Record) {
+            alert("Please fill at least one clinical info field");
+            return;
+          }
+
+          try {
+            const res = await window.api.addPatientRecord(
+              patientId,
+              { triage, primarySurvey, news2Record },
+              token
+            );
+            if (res && res.success) {
+              document.getElementById("statusMsg").textContent =
+                "Clinical info saved successfully.";
+              document.getElementById("inputTriage").value = "";
+              document.getElementById("inputPrimarySurvey").value = "";
+              document.getElementById("inputNews2").value = "";
+              // Optionally reload the patient data to refresh medical history:
+              const updatedPatient = await window.api.getPatient(
+                patientId,
+                token
+              );
+              histList.innerHTML = "";
+              (updatedPatient.medicalHistory || []).forEach((item) => {
+                const li = document.createElement("li");
+                let text = "";
+                if (typeof item === "string") {
+                  text = item;
+                } else {
+                  if (item.createdAt)
+                    text += `Date: ${new Date(
+                      item.createdAt
+                    ).toLocaleString()}\n`;
+                  if (item.triage) text += `Triage: ${item.triage}\n`;
+                  if (item.primarySurvey)
+                    text += `Primary Survey: ${item.primarySurvey}\n`;
+                  if (item.news2Record) text += `NEWS 2: ${item.news2Record}`;
+                }
+                li.textContent = text;
+                histList.appendChild(li);
+              });
+            } else {
+              document.getElementById("statusMsg").textContent =
+                "Error saving clinical info.";
+            }
+          } catch (e) {
+            document.getElementById("statusMsg").textContent =
+              "Error saving clinical info: " + e.message;
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>

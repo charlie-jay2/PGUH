@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NHS Staff Dashboard — Hospital Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">NHS — Prince Georges University Hospital</div>
+      <div class="meta" id="metaArea">
+        <!-- filled by JS -->
+      </div>
+    </header>
+
+    <!-- LOGIN -->
+    <main class="container" id="mainContainer">
+      <section id="loginPanel" class="panel login-panel">
+        <h2>Staff Login</h2>
+        <form id="loginForm" class="form">
+          <label
+            >Username
+            <input type="text" id="loginUsername" required />
+          </label>
+          <label
+            >Password
+            <input type="password" id="loginPassword" required />
+          </label>
+          <div class="form-actions">
+            <button id="loginBtn" type="button">Log in</button>
+          </div>
+        </form>
+        <div class="note">
+          First-time setup: create an account using the `registerStaff` function
+          (temporarily enabled) or seed DB.
+        </div>
+      </section>
+
+      <!-- DASHBOARD (hidden until logged in) -->
+      <section id="dashboard" class="hidden">
+        <section class="panel hospital-overview">
+          <h2>Hospital Overview</h2>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Wait time</div>
+              <div id="waitTime" class="stat-value">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Beds available</div>
+              <div id="bedsAvailable" class="stat-value">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Total beds</div>
+              <div id="totalBeds" class="stat-value">—</div>
+            </div>
+            <div class="stat small">
+              <div class="stat-label">Last updated</div>
+              <div id="lastUpdated" class="stat-value">—</div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <button id="editHospitalBtn">Edit hospital data</button>
+          </div>
+
+          <form id="hospitalForm" class="hidden form">
+            <label
+              >Wait time (mins)
+              <input type="number" id="inputWaitTime" min="0" />
+            </label>
+            <label
+              >Beds available
+              <input type="number" id="inputBedsAvailable" min="0" />
+            </label>
+            <label
+              >Total beds
+              <input type="number" id="inputTotalBeds" min="0" />
+            </label>
+            <div class="form-actions">
+              <button id="saveHospitalBtn" type="button">Save</button>
+              <button id="cancelHospitalBtn" type="button">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel patients">
+          <h2>Patients</h2>
+
+          <div class="patient-controls">
+            <button id="newPatientBtn">Add patient</button>
+            <input
+              type="search"
+              id="searchPatient"
+              placeholder="Search patients (name, id)"
+            />
+          </div>
+
+          <form id="patientForm" class="hidden form patient-form">
+            <h3 id="patientFormTitle">Add patient</h3>
+            <label
+              >Patient ID (hospital)
+              <input type="text" id="patientId" required />
+            </label>
+            <label
+              >Name
+              <input type="text" id="patientName" required />
+            </label>
+            <label
+              >Age
+              <input type="number" id="patientAge" min="0" />
+            </label>
+            <label
+              >Ward
+              <input type="text" id="patientWard" />
+            </label>
+            <label
+              >Condition / Notes
+              <textarea id="patientNotes"></textarea>
+            </label>
+            <div class="form-actions">
+              <button id="savePatientBtn" type="button">Save patient</button>
+              <button id="cancelPatientBtn" type="button">Cancel</button>
+            </div>
+          </form>
+
+          <table id="patientsTable" class="table">
+            <thead>
+              <tr>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Ward</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="patientsBody"></tbody>
+          </table>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Copyright 2025 © Prince Georges University Hospital
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
