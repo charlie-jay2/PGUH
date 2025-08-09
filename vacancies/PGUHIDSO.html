@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apply: Security Officer | PGUH Careers</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="icon" href="../Assets/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">PGUH Careers</div>
+      <nav>
+        <a href="../careers.html" style="color: white; margin-right: 16px"
+          >Back to Careers</a
+        >
+      </nav>
+    </header>
+
+    <main class="container" style="max-width: 700px">
+      <section class="panel">
+        <h1 style="color: var(--nhs-blue); margin-bottom: 16px">
+          Application: Security Officer
+        </h1>
+
+        <form id="applicationForm" class="form" action="#" method="post">
+          <label>
+            Roblox Name:
+            <input type="text" name="robloxName" required />
+          </label>
+
+          <label>
+            Discord Username:
+            <input type="text" name="discordUsername" required />
+          </label>
+
+          <label>
+            Roblox Profile Link:
+            <input
+              type="url"
+              name="robloxProfile"
+              required
+              placeholder="https://www.roblox.com/users/123456/profile"
+            />
+          </label>
+
+          <label>
+            What makes you want to apply for this role?
+            <textarea name="whyApply" rows="4" required></textarea>
+          </label>
+
+          <label>
+            What makes you stand out over other candidates for this role?
+            <textarea name="standOut" rows="4" required></textarea>
+          </label>
+
+          <label>
+            Please list all current/previous experience within the healthcare
+            sector.<br />
+            (Can be both ROBLOX and real life.)
+            <textarea name="experience" rows="4" required></textarea>
+          </label>
+
+          <h2 style="margin-top: 24px; color: var(--nhs-dark)">
+            Scenario Questions
+          </h2>
+
+          <label>
+            How would you handle a situation where a visitor refuses to follow
+            hospital rules?
+            <textarea name="scenario1" rows="4" required></textarea>
+          </label>
+
+          <label>
+            Describe your approach to maintaining safety and security in a busy
+            hospital environment.
+            <textarea name="scenario2" rows="4" required></textarea>
+          </label>
+
+          <label>
+            Give an example of when you had to stay calm and make quick
+            decisions under pressure.
+            <textarea name="scenario3" rows="4" required></textarea>
+          </label>
+
+          <button type="submit" style="margin-top: 20px">
+            Submit Application
+          </button>
+        </form>
+      </section>
+    </main>
+    <script>
+      const form = document.getElementById("applicationForm");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Gather form values
+        const formData = new FormData(form);
+
+        // Prepare data object for the API
+        const data = {
+          robloxName: formData.get("robloxName").trim(),
+          discordUsername: formData.get("discordUsername").trim(),
+          robloxProfileLink: formData.get("robloxProfile").trim(),
+          roleApplied: "Healthcare Assistant (Emergency Medicine)",
+          motivation: formData.get("whyApply").trim(),
+          standOut: formData.get("standOut").trim(),
+          experience: formData.get("experience").trim(),
+          scenarioAnswers: {
+            scenario1: formData.get("scenario1").trim(),
+            scenario2: formData.get("scenario2").trim(),
+            scenario3: formData.get("scenario3").trim(),
+          },
+        };
+
+        try {
+          const response = await fetch("/.netlify/functions/sendResponse", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            alert("Error submitting application: " + errorText);
+            return;
+          }
+
+          alert("Application submitted successfully! Thank you.");
+          form.reset();
+        } catch (err) {
+          alert("Failed to submit application. Please try again later.");
+          console.error(err);
+        }
+      });
+    </script>
+
+    <footer class="footer" style="text-align: center">
+      &copy; 2025 Prince George University Hospital. All rights reserved.
+    </footer>
+  </body>
+</html>

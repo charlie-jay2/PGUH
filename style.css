@@ -591,3 +591,56 @@ footer.footer {
 #clinicalInfoForm fieldset + fieldset {
   margin-top: 24px;
 }
+
+/* Vacancy cards container styles */
+.vacancy-card {
+  background: var(--panel);
+  border: 1px solid #d7dce9;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  max-width: 700px;
+  transition: box-shadow 0.3s ease;
+}
+
+.vacancy-card:hover {
+  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.15);
+}
+
+.vacancy-card h3 {
+  color: var(--nhs-dark);
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.vacancy-card p {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* Apply Button style */
+.btn-apply {
+  display: inline-block;
+  background-color: var(--nhs-blue);
+  color: white;
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-apply:hover,
+.btn-apply:focus {
+  background-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 8px var(--accent);
+}
