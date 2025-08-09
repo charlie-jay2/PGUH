@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Patient Details — NHS Staff Portal</title>
     <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* Replacing inline fieldset styles */
+      form fieldset {
+        border: 1px solid #ccc;
+        padding: 12px;
+        margin-bottom: 16px;
+      }
+
+      /* CARE TEAM Section margin tweak (was 1px inline) */
+      form fieldset.care-team {
+        margin-bottom: 1px;
+      }
+    </style>
   </head>
   <body>
     <header class="topbar">
@@ -20,11 +34,9 @@
       <section id="patientDetails" class="panel">
         <h2 id="patientName">Loading...</h2>
 
-        <div>
-          <p><strong>Patient ID:</strong> <span id="patientId"></span></p>
-          <p><strong>Age:</strong> <span id="patientAge"></span></p>
-          <p><strong>Ward:</strong> <span id="patientWard"></span></p>
-          <p><strong>Notes:</strong> <span id="patientNotes"></span></p>
+        <!-- New summary vertical layout -->
+        <div id="patientSummary">
+          <!-- Filled by JS -->
         </div>
 
         <h3>Medical History</h3>
@@ -32,21 +44,157 @@
 
         <h3>Add Clinical Information</h3>
         <form id="clinicalInfoForm" class="form">
-          <label
-            >Triage Information:<br />
-            <textarea id="inputTriage" rows="3"></textarea></label
-          ><br />
-          <label
-            >Primary Survey:<br />
-            <textarea id="inputPrimarySurvey" rows="3"></textarea></label
-          ><br />
-          <label
-            >NEWS 2 Record:<br />
-            <textarea id="inputNews2" rows="3"></textarea></label
-          ><br />
+          <!-- TRIAGE Section -->
+          <fieldset>
+            <legend><strong>TRIAGE Section</strong></legend>
+            <label
+              >ED Location:
+              <input type="text" id="inputEdLocation" />
+            </label>
+            <label
+              >Allergies:
+              <input type="text" id="inputAllergies" />
+            </label>
+            <label
+              >Triage Time:
+              <input type="datetime-local" id="inputTriageTime" />
+            </label>
+          </fieldset>
+
+          <!-- CARE TEAM Section -->
+          <fieldset class="care-team">
+            <legend><strong>CARE TEAM Section</strong> (optional)</legend>
+            <label
+              >Nurse:
+              <input type="text" id="inputNurse" />
+            </label>
+            <label
+              >Overseeing Clinician:
+              <input type="text" id="inputOverseeingClinician" />
+            </label>
+            <label
+              >Direct Clinician:
+              <input type="text" id="inputDirectClinician" />
+            </label>
+            <label
+              >Specialist Clinician:
+              <input type="text" id="inputSpecialistClinician" />
+            </label>
+            <label
+              >Pharmacist:
+              <input type="text" id="inputPharmacist" />
+            </label>
+            <label
+              >CCOT:
+              <input type="text" id="inputCCOT" />
+            </label>
+            <label
+              >Consulting Speciality:
+              <input type="text" id="inputConsultingSpeciality" />
+            </label>
+            <label
+              >Admitting Speciality:
+              <input type="text" id="inputAdmittingSpeciality" />
+            </label>
+          </fieldset>
+
+          <!-- LATEST OBSERVATIONS (required) -->
+          <fieldset>
+            <legend><strong>LATEST OBSERVATIONS (required)</strong></legend>
+
+            <label
+              >NEWS2 SCORE:
+              <select id="inputNews2Score" required>
+                <option value="">Select Score</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </label>
+            <label
+              >HR (Heart Rate):
+              <input type="number" id="inputHeartRate" min="0" required />
+            </label>
+            <label
+              >BP (Blood Pressure):
+              <input type="text" id="inputBloodPressure" required />
+            </label>
+            <label
+              >SpO2 (Blood Oxygen):
+              <input type="number" id="inputSpO2" min="0" max="100" required />
+            </label>
+            <label
+              >RR (Respiratory Rate):
+              <input type="number" id="inputRespiratoryRate" min="0" required />
+            </label>
+            <label
+              >Temperature:
+              <input type="number" id="inputTemperature" step="0.1" required />
+            </label>
+            <label
+              >AVPU:
+              <input type="text" id="inputAVPU" required />
+            </label>
+            <label
+              >GCS:
+              <input type="text" id="inputGCS" required />
+            </label>
+          </fieldset>
+
+          <!-- OTHER DETAILS -->
+          <fieldset>
+            <legend><strong>OTHER DETAILS</strong></legend>
+            <label
+              >Presenting Complaint?
+              <textarea id="inputPresentingComplaint" rows="2"></textarea>
+            </label>
+            <label
+              >History of presenting complaint?
+              <textarea
+                id="inputHistoryPresentingComplaint"
+                rows="2"
+              ></textarea>
+            </label>
+            <label
+              >Past Medical History?
+              <textarea id="inputPastMedicalHistory" rows="2"></textarea>
+            </label>
+            <label
+              >Current Medications?
+              <textarea id="inputCurrentMedications" rows="2"></textarea>
+            </label>
+            <label
+              >Differential Diagnosis
+              <textarea id="inputDifferentialDiagnosis" rows="2"></textarea>
+            </label>
+          </fieldset>
+
+          <!-- DISCHARGE LOGS -->
+          <fieldset>
+            <legend><strong>DISCHARGE LOGS</strong></legend>
+            <label
+              >Who discharged:
+              <input type="text" id="inputWhoDischarged" />
+            </label>
+            <label
+              >Time of discharge:
+              <input type="datetime-local" id="inputTimeDischarge" />
+            </label>
+            <label
+              >Outcome of patient:
+              <textarea id="inputOutcomePatient" rows="2"></textarea>
+            </label>
+          </fieldset>
+
           <div class="form-actions">
             <button id="saveClinicalBtn" type="button">
               Save Clinical Info
+            </button>
+          </div>
+          <div class="form-actions" style="margin-top: 10px">
+            <button id="exportMedicalHistoryBtn" type="button">
+              Export Medical History
             </button>
           </div>
         </form>
@@ -66,7 +214,18 @@
     <script src="app.js"></script>
 
     <script>
-      // API helpers for patient data
+      function calculateAge(dobString) {
+        if (!dobString) return "—";
+        const dob = new Date(dobString);
+        const now = new Date();
+        let age = now.getFullYear() - dob.getFullYear();
+        const m = now.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) {
+          age--;
+        }
+        return age;
+      }
+
       window.api = {
         async getPatient(id, token) {
           const res = await fetch(
@@ -80,6 +239,24 @@
           );
           if (!res.ok) {
             throw new Error(`Error fetching patient: ${res.statusText}`);
+          }
+          return res.json();
+        },
+
+        async getLatestMedicalHistory(id, token) {
+          const res = await fetch(
+            `/.netlify/functions/getLatestMedicalHistory?id=${id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!res.ok) {
+            throw new Error(
+              `Error fetching latest medical history: ${res.statusText}`
+            );
           }
           return res.json();
         },
@@ -100,7 +277,6 @@
         },
       };
 
-      // On page load:
       (async () => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -122,7 +298,6 @@
           return;
         }
 
-        // Fetch patient data
         let patient;
         try {
           patient = await window.api.getPatient(patientId, token);
@@ -133,20 +308,38 @@
         }
 
         document.getElementById("patientName").textContent = patient.name;
-        document.getElementById("patientId").textContent =
-          patient.patientId || "—";
-        document.getElementById("patientAge").textContent = patient.age || "—";
-        document.getElementById("patientWard").textContent =
-          patient.ward || "—";
-        document.getElementById("patientNotes").textContent =
-          patient.notes || "—";
 
-        // Medical history
+        // Remove old fields Patient ID, Age, Ward, Notes if present
+        ["patientId", "patientAge", "patientWard", "patientNotes"].forEach(
+          (id) => {
+            const el = document.getElementById(id);
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          }
+        );
+
+        // Fill the new summary vertical layout
+        const summaryDiv = document.getElementById("patientSummary");
+        summaryDiv.innerHTML = `
+          <p><strong>Roblox Name:</strong> ${patient.robloxName || "—"}</p>
+          <p><strong>Date of Birth:</strong> ${
+            patient.dateOfBirth
+              ? new Date(patient.dateOfBirth).toLocaleDateString()
+              : "—"
+          }</p>
+          <p><strong>Age:</strong> ${calculateAge(patient.dateOfBirth)}</p>
+          <p><strong>Patient ID:</strong> ${patient.patientId || "—"}</p>
+          <p><strong>Priority:</strong> ${
+            patient.priority !== undefined ? patient.priority : "—"
+          }</p>
+          <p><strong>Presenting Complaint:</strong> ${
+            patient.presentingComplaint || "—"
+          }</p>
+        `;
+
+        // Fill medical history list
         const histList = document.getElementById("medicalHistoryList");
         histList.innerHTML = "";
         (patient.medicalHistory || []).forEach((item) => {
-          // Each item may be an object with triage, primarySurvey, news2Record, createdAt fields.
-          // Format nicely:
           const li = document.createElement("li");
           let text = "";
           if (typeof item === "string") {
@@ -163,66 +356,343 @@
           histList.appendChild(li);
         });
 
+        // Load latest medical history and autofill inputs
+        try {
+          const latest = await window.api.getLatestMedicalHistory(
+            patientId,
+            token
+          );
+
+          document.getElementById("inputEdLocation").value =
+            latest.edLocation || "";
+          document.getElementById("inputAllergies").value =
+            latest.allergies || "";
+          document.getElementById("inputTriageTime").value =
+            latest.triageTime || "";
+          document.getElementById("inputNurse").value = latest.nurse || "";
+          document.getElementById("inputOverseeingClinician").value =
+            latest.overseeingClinician || "";
+          document.getElementById("inputDirectClinician").value =
+            latest.directClinician || "";
+          document.getElementById("inputSpecialistClinician").value =
+            latest.specialistClinician || "";
+          document.getElementById("inputPharmacist").value =
+            latest.pharmacist || "";
+          document.getElementById("inputCCOT").value = latest.ccot || "";
+          document.getElementById("inputConsultingSpeciality").value =
+            latest.consultingSpeciality || "";
+          document.getElementById("inputAdmittingSpeciality").value =
+            latest.admittingSpeciality || "";
+          document.getElementById("inputNews2Score").value =
+            latest.news2Score || "";
+          document.getElementById("inputHeartRate").value =
+            latest.heartRate || "";
+          document.getElementById("inputBloodPressure").value =
+            latest.bloodPressure || "";
+          document.getElementById("inputSpO2").value = latest.spO2 || "";
+          document.getElementById("inputRespiratoryRate").value =
+            latest.respiratoryRate || "";
+          document.getElementById("inputTemperature").value =
+            latest.temperature || "";
+          document.getElementById("inputAVPU").value = latest.avpu || "";
+          document.getElementById("inputGCS").value = latest.gcs || "";
+          document.getElementById("inputPresentingComplaint").value =
+            latest.presentingComplaint || "";
+          document.getElementById("inputHistoryPresentingComplaint").value =
+            latest.historyPresentingComplaint || "";
+          document.getElementById("inputPastMedicalHistory").value =
+            latest.pastMedicalHistory || "";
+          document.getElementById("inputCurrentMedications").value =
+            latest.currentMedications || "";
+          document.getElementById("inputDifferentialDiagnosis").value =
+            latest.differentialDiagnosis || "";
+          document.getElementById("inputWhoDischarged").value =
+            latest.whoDischarged || "";
+          document.getElementById("inputTimeDischarge").value =
+            latest.timeDischarge || "";
+          document.getElementById("inputOutcomePatient").value =
+            latest.outcomePatient || "";
+        } catch (e) {
+          console.warn("Failed to load latest medical history:", e);
+        }
+
         // Save clinical info button
         document.getElementById("saveClinicalBtn").onclick = async () => {
-          const triage = document.getElementById("inputTriage").value.trim();
-          const primarySurvey = document
-            .getElementById("inputPrimarySurvey")
+          // Collect all inputs
+          const triage =
+            document.getElementById("inputTriage")?.value.trim() || "";
+          const primarySurvey =
+            document.getElementById("inputPrimarySurvey")?.value.trim() || "";
+          const news2Record =
+            document.getElementById("inputNews2")?.value.trim() || "";
+
+          // New fields from TRIAGE section
+          const edLocation = document
+            .getElementById("inputEdLocation")
             .value.trim();
-          const news2Record = document
-            .getElementById("inputNews2")
+          const allergies = document
+            .getElementById("inputAllergies")
+            .value.trim();
+          const triageTime = document.getElementById("inputTriageTime").value;
+
+          // New fields from CARE TEAM section
+          const nurse = document.getElementById("inputNurse").value.trim();
+          const overseeingClinician = document
+            .getElementById("inputOverseeingClinician")
+            .value.trim();
+          const directClinician = document
+            .getElementById("inputDirectClinician")
+            .value.trim();
+          const specialistClinician = document
+            .getElementById("inputSpecialistClinician")
+            .value.trim();
+          const pharmacist = document
+            .getElementById("inputPharmacist")
+            .value.trim();
+          const ccot = document.getElementById("inputCCOT").value.trim();
+          const consultingSpeciality = document
+            .getElementById("inputConsultingSpeciality")
+            .value.trim();
+          const admittingSpeciality = document
+            .getElementById("inputAdmittingSpeciality")
             .value.trim();
 
-          if (!triage && !primarySurvey && !news2Record) {
-            alert("Please fill at least one clinical info field");
+          // New fields from LATEST OBSERVATIONS (required)
+          const news2Score = document.getElementById("inputNews2Score").value;
+          const heartRate = document
+            .getElementById("inputHeartRate")
+            .value.trim();
+          const bloodPressure = document
+            .getElementById("inputBloodPressure")
+            .value.trim();
+          const spO2 = document.getElementById("inputSpO2").value.trim();
+          const respiratoryRate = document
+            .getElementById("inputRespiratoryRate")
+            .value.trim();
+          const temperature = document
+            .getElementById("inputTemperature")
+            .value.trim();
+          const avpu = document.getElementById("inputAVPU").value.trim();
+          const gcs = document.getElementById("inputGCS").value.trim();
+
+          // New fields from OTHER DETAILS
+          const presentingComplaint = document
+            .getElementById("inputPresentingComplaint")
+            .value.trim();
+          const historyPresentingComplaint = document
+            .getElementById("inputHistoryPresentingComplaint")
+            .value.trim();
+          const pastMedicalHistory = document
+            .getElementById("inputPastMedicalHistory")
+            .value.trim();
+          const currentMedications = document
+            .getElementById("inputCurrentMedications")
+            .value.trim();
+          const differentialDiagnosis = document
+            .getElementById("inputDifferentialDiagnosis")
+            .value.trim();
+
+          // New fields from DISCHARGE LOGS
+          const whoDischarged = document
+            .getElementById("inputWhoDischarged")
+            .value.trim();
+          const timeDischarge =
+            document.getElementById("inputTimeDischarge").value;
+          const outcomePatient = document
+            .getElementById("inputOutcomePatient")
+            .value.trim();
+
+          // Validate required latest observations
+          if (
+            !news2Score ||
+            !heartRate ||
+            !bloodPressure ||
+            !spO2 ||
+            !respiratoryRate ||
+            !temperature ||
+            !avpu ||
+            !gcs
+          ) {
+            alert("Please fill all required Latest Observations fields");
             return;
           }
 
+          // Validate at least one clinical info field filled
+          const hasAnyField =
+            triage ||
+            primarySurvey ||
+            news2Record ||
+            edLocation ||
+            allergies ||
+            triageTime ||
+            nurse ||
+            overseeingClinician ||
+            directClinician ||
+            specialistClinician ||
+            pharmacist ||
+            ccot ||
+            consultingSpeciality ||
+            admittingSpeciality ||
+            news2Score ||
+            heartRate ||
+            bloodPressure ||
+            spO2 ||
+            respiratoryRate ||
+            temperature ||
+            avpu ||
+            gcs ||
+            presentingComplaint ||
+            historyPresentingComplaint ||
+            pastMedicalHistory ||
+            currentMedications ||
+            differentialDiagnosis ||
+            whoDischarged ||
+            timeDischarge ||
+            outcomePatient;
+
+          if (!hasAnyField) {
+            alert("Please fill at least one field before saving.");
+            return;
+          }
+
+          const record = {
+            triage: triage || null,
+            primarySurvey: primarySurvey || null,
+            news2Record: news2Record || null,
+
+            edLocation: edLocation || null,
+            allergies: allergies || null,
+            triageTime: triageTime || null,
+
+            nurse: nurse || null,
+            overseeingClinician: overseeingClinician || null,
+            directClinician: directClinician || null,
+            specialistClinician: specialistClinician || null,
+            pharmacist: pharmacist || null,
+            ccot: ccot || null,
+            consultingSpeciality: consultingSpeciality || null,
+            admittingSpeciality: admittingSpeciality || null,
+
+            news2Score: news2Score || null,
+            heartRate: heartRate || null,
+            bloodPressure: bloodPressure || null,
+            spO2: spO2 || null,
+            respiratoryRate: respiratoryRate || null,
+            temperature: temperature || null,
+            avpu: avpu || null,
+            gcs: gcs || null,
+
+            presentingComplaint: presentingComplaint || null,
+            historyPresentingComplaint: historyPresentingComplaint || null,
+            pastMedicalHistory: pastMedicalHistory || null,
+            currentMedications: currentMedications || null,
+            differentialDiagnosis: differentialDiagnosis || null,
+
+            whoDischarged: whoDischarged || null,
+            timeDischarge: timeDischarge || null,
+            outcomePatient: outcomePatient || null,
+          };
+
           try {
-            const res = await window.api.addPatientRecord(
-              patientId,
-              { triage, primarySurvey, news2Record },
-              token
-            );
-            if (res && res.success) {
-              document.getElementById("statusMsg").textContent =
-                "Clinical info saved successfully.";
-              document.getElementById("inputTriage").value = "";
-              document.getElementById("inputPrimarySurvey").value = "";
-              document.getElementById("inputNews2").value = "";
-              // Optionally reload the patient data to refresh medical history:
-              const updatedPatient = await window.api.getPatient(
-                patientId,
-                token
-              );
-              histList.innerHTML = "";
-              (updatedPatient.medicalHistory || []).forEach((item) => {
-                const li = document.createElement("li");
-                let text = "";
-                if (typeof item === "string") {
-                  text = item;
-                } else {
-                  if (item.createdAt)
-                    text += `Date: ${new Date(
-                      item.createdAt
-                    ).toLocaleString()}\n`;
-                  if (item.triage) text += `Triage: ${item.triage}\n`;
-                  if (item.primarySurvey)
-                    text += `Primary Survey: ${item.primarySurvey}\n`;
-                  if (item.news2Record) text += `NEWS 2: ${item.news2Record}`;
-                }
-                li.textContent = text;
-                histList.appendChild(li);
-              });
-            } else {
-              document.getElementById("statusMsg").textContent =
-                "Error saving clinical info.";
-            }
+            await window.api.addPatientRecord(patientId, record, token);
+            alert("Clinical info saved successfully!");
+            window.location.reload(); // Reload to fetch latest data and autofill
           } catch (e) {
-            document.getElementById("statusMsg").textContent =
-              "Error saving clinical info: " + e.message;
+            alert("Failed to save clinical info: " + e.message);
           }
         };
+
+        // Export Medical History button
+        document
+          .getElementById("exportMedicalHistoryBtn")
+          .addEventListener("click", () => {
+            const medicalHistory = patient.medicalHistory || [];
+            const csvContent =
+              "data:text/csv;charset=utf-8," +
+              [
+                [
+                  "Created At",
+                  "Created By",
+                  "Triage",
+                  "Primary Survey",
+                  "NEWS2 Record",
+                  "ED Location",
+                  "Allergies",
+                  "Triage Time",
+                  "Nurse",
+                  "Overseeing Clinician",
+                  "Direct Clinician",
+                  "Specialist Clinician",
+                  "Pharmacist",
+                  "CCOT",
+                  "Consulting Speciality",
+                  "Admitting Speciality",
+                  "NEWS2 Score",
+                  "Heart Rate",
+                  "Blood Pressure",
+                  "SpO2",
+                  "Respiratory Rate",
+                  "Temperature",
+                  "AVPU",
+                  "GCS",
+                  "Presenting Complaint",
+                  "History Presenting Complaint",
+                  "Past Medical History",
+                  "Current Medications",
+                  "Differential Diagnosis",
+                  "Who Discharged",
+                  "Time Discharge",
+                  "Outcome Patient",
+                ],
+                ...medicalHistory.map((rec) => [
+                  rec.createdAt ? new Date(rec.createdAt).toLocaleString() : "",
+                  rec.createdBy || "",
+                  rec.triage || "",
+                  rec.primarySurvey || "",
+                  rec.news2Record || "",
+                  rec.edLocation || "",
+                  rec.allergies || "",
+                  rec.triageTime || "",
+                  rec.nurse || "",
+                  rec.overseeingClinician || "",
+                  rec.directClinician || "",
+                  rec.specialistClinician || "",
+                  rec.pharmacist || "",
+                  rec.ccot || "",
+                  rec.consultingSpeciality || "",
+                  rec.admittingSpeciality || "",
+                  rec.news2Score || "",
+                  rec.heartRate || "",
+                  rec.bloodPressure || "",
+                  rec.spO2 || "",
+                  rec.respiratoryRate || "",
+                  rec.temperature || "",
+                  rec.avpu || "",
+                  rec.gcs || "",
+                  rec.presentingComplaint || "",
+                  rec.historyPresentingComplaint || "",
+                  rec.pastMedicalHistory || "",
+                  rec.currentMedications || "",
+                  rec.differentialDiagnosis || "",
+                  rec.whoDischarged || "",
+                  rec.timeDischarge || "",
+                  rec.outcomePatient || "",
+                ]),
+              ]
+                .map((e) => e.join(","))
+                .join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute(
+              "download",
+              `${patient.name.replace(/\s+/g, "_")}_medical_history.csv`
+            );
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          });
       })();
     </script>
   </body>

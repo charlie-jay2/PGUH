@@ -10,18 +10,61 @@ exports.handler = async function (event) {
   }
 
   try {
-    verifyTokenFromHeaders(event.headers);
+    const user = verifyTokenFromHeaders(event.headers); // returns user payload
 
     const data = JSON.parse(event.body || "{}");
-    const { id, triage, primarySurvey, news2Record } = data;
+    const { id } = data;
 
     if (!id) {
       return { statusCode: 400, body: "Missing patient ID" };
     }
 
-    if (!triage && !primarySurvey && !news2Record) {
-      return { statusCode: 400, body: "No clinical info provided" };
-    }
+    // Build clinical record with all fields, fallback to null or empty string
+    const record = {
+      triage: data.triage || null,
+      primarySurvey: data.primarySurvey || null,
+      news2Record: data.news2Record || null,
+
+      // TRIAGE Section
+      edLocation: data.edLocation || null,
+      allergies: data.allergies || null,
+      triageTime: data.triageTime || null,
+
+      // CARE TEAM Section
+      nurse: data.nurse || null,
+      overseeingClinician: data.overseeingClinician || null,
+      directClinician: data.directClinician || null,
+      specialistClinician: data.specialistClinician || null,
+      pharmacist: data.pharmacist || null,
+      ccot: data.ccot || null,
+      consultingSpeciality: data.consultingSpeciality || null,
+      admittingSpeciality: data.admittingSpeciality || null,
+
+      // LATEST OBSERVATIONS
+      news2Score: data.news2Score || null,
+      heartRate: data.heartRate || null,
+      bloodPressure: data.bloodPressure || null,
+      spO2: data.spO2 || null,
+      respiratoryRate: data.respiratoryRate || null,
+      temperature: data.temperature || null,
+      avpu: data.avpu || null,
+      gcs: data.gcs || null,
+
+      // OTHER DETAILS
+      presentingComplaint: data.presentingComplaint || null,
+      historyPresentingComplaint: data.historyPresentingComplaint || null,
+      pastMedicalHistory: data.pastMedicalHistory || null,
+      currentMedications: data.currentMedications || null,
+      differentialDiagnosis: data.differentialDiagnosis || null,
+
+      // DISCHARGE LOGS
+      whoDischarged: data.whoDischarged || null,
+      timeDischarge: data.timeDischarge || null,
+      outcomePatient: data.outcomePatient || null,
+
+      createdAt: new Date(),
+      createdBy: user?.username || "staff",
+    };
 
     const db = await connectToDatabase(
       process.env.MONGODB_URI,
@@ -29,18 +72,13 @@ exports.handler = async function (event) {
     );
     const patientsCol = db.collection("patients");
 
-    const record = {
-      triage: triage || null,
-      primarySurvey: primarySurvey || null,
-      news2Record: news2Record || null,
-      createdAt: new Date(),
-      createdBy: "staff", // Optionally grab username from token payload
-    };
-
-    // Push new clinical record into an array field "medicalHistory"
+    // Push record to medicalHistory AND update latestClinicalInfo field
     const updateResult = await patientsCol.updateOne(
       { _id: new ObjectId(id) },
-      { $push: { medicalHistory: record } }
+      {
+        $push: { medicalHistory: record },
+        $set: { latestClinicalInfo: record },
+      }
     );
 
     if (updateResult.modifiedCount === 0) {

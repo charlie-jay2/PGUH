@@ -11,9 +11,13 @@ exports.handler = async function (event) {
     const payload = JSON.parse(event.body || "{}");
 
     const record = {
+      robloxName: payload.robloxName || "", // NEW field
+      dateOfBirth: payload.dateOfBirth || "", // NEW field (string ISO date)
       patientId: payload.patientId || "",
-      name: payload.name || "",
-      age: payload.age ?? null,
+      nilByMouth: payload.nilByMouth || "", // NEW field ('Y' or 'N')
+      presentingComplaint: payload.presentingComplaint || "", // NEW field
+      name: payload.name || "", // you might want to remove this if unused
+      age: payload.age ?? null, // optional, if you still want to keep
       ward: payload.ward || "",
       notes: payload.notes || "",
       priority: Number.isInteger(payload.priority) ? payload.priority : 0,

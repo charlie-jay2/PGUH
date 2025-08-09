@@ -377,3 +377,217 @@ select.priority-select option[value="4"] {
 #adminPanel button#createUserBtn:hover {
   background-color: var(--accent);
 }
+
+/* Container and panel */
+.container {
+  max-width: var(--max-width);
+  margin: 20px auto;
+  padding: 0 16px;
+  display: grid;
+  gap: var(--gap);
+  font-family: var(--font-family, "Frutiger", Arial, sans-serif);
+}
+
+.panel {
+  background: var(--panel);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  border: 1px solid #d7dce9;
+}
+
+/* Headers */
+h2,
+h3 {
+  color: var(--nhs-dark);
+  margin-bottom: 12px;
+}
+
+/* Patient info paragraphs */
+#patientDetails > div p {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+/* Medical History list */
+#medicalHistoryList {
+  list-style: disc inside;
+  margin-bottom: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-left: 18px;
+  border: 1px solid #d7dce9;
+  border-radius: var(--radius);
+  background: #f9fbfe;
+}
+
+/* Form styling */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Fieldset styling */
+form fieldset {
+  border: 1px solid #d7dce9;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: #fefefe;
+}
+
+/* Legend styling */
+form legend {
+  font-weight: 700;
+  color: var(--nhs-blue);
+  padding: 0 8px;
+  font-size: 1.1rem;
+}
+
+/* Labels and inputs */
+form label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--nhs-dark);
+  font-size: 0.9rem;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="datetime-local"],
+form select,
+form textarea {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #d7dce9;
+  border-radius: 6px;
+  background: white;
+  font-family: "Frutiger", Arial, sans-serif;
+  font-size: 1rem;
+  color: var(--nhs-dark);
+  transition: border-color 0.3s ease;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form input[type="datetime-local"]:focus,
+form select:focus,
+form textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 6px var(--accent);
+}
+
+/* Textarea fixes */
+form textarea {
+  resize: vertical;
+  min-height: 48px;
+}
+
+/* Layout inputs inside fieldset - two columns for larger screens */
+@media (min-width: 720px) {
+  form fieldset {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px 24px;
+  }
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* Save button */
+button#saveClinicalBtn {
+  background: var(--nhs-blue);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+button#saveClinicalBtn:hover {
+  background: var(--accent);
+}
+
+/* Status message styling */
+#statusMsg {
+  margin-top: 16px;
+  font-weight: 600;
+  color: var(--nhs-blue);
+}
+
+/* Footer tweaks */
+footer.footer {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 24px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ==== New adjustments for Triage, Care Team, Latest Observations compactness
+       and Other Details + Discharge Logs bigger inputs ==== */
+
+/* Make Triage, Care Team, and Latest Observations sections more compact */
+#clinicalInfoForm fieldset:nth-of-type(1), /* Triage Section */
+#clinicalInfoForm fieldset:nth-of-type(2), /* Care Team Section */
+#clinicalInfoForm fieldset:nth-of-type(3)  /* Latest Observations */ {
+  padding: 12px 16px;
+}
+
+#clinicalInfoForm fieldset:nth-of-type(1) label,
+#clinicalInfoForm fieldset:nth-of-type(2) label,
+#clinicalInfoForm fieldset:nth-of-type(3) label {
+  margin-bottom: 8px;
+}
+
+#clinicalInfoForm fieldset:nth-of-type(1) input,
+#clinicalInfoForm fieldset:nth-of-type(2) input,
+#clinicalInfoForm fieldset:nth-of-type(3) input,
+#clinicalInfoForm fieldset:nth-of-type(3) select {
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  height: 32px;
+}
+
+/* Make Other Details and Discharge Logs bigger for easier text entry */
+#clinicalInfoForm fieldset:nth-of-type(4), /* Other Details */
+#clinicalInfoForm fieldset:nth-of-type(5)  /* Discharge Logs */ {
+  padding: 24px 28px;
+}
+
+#clinicalInfoForm fieldset:nth-of-type(4) label,
+#clinicalInfoForm fieldset:nth-of-type(5) label {
+  margin-bottom: 16px;
+}
+
+/* Textareas in Other Details and Discharge Logs bigger */
+#clinicalInfoForm fieldset:nth-of-type(4) textarea,
+#clinicalInfoForm fieldset:nth-of-type(5) textarea {
+  min-height: 80px;
+  font-size: 1rem;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+/* Also increase height for text inputs in Discharge Logs */
+#clinicalInfoForm fieldset:nth-of-type(5) input {
+  height: 36px;
+  padding: 8px 10px;
+  font-size: 1rem;
+}
+
+/* Optional: add some extra vertical spacing between form sections */
+#clinicalInfoForm fieldset + fieldset {
+  margin-top: 24px;
+}

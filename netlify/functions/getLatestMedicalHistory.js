@@ -1,4 +1,4 @@
-// netlify/functions/getPatientById.js
+// netlify/functions/getLatestMedicalHistory.js
 
 const { connectToDatabase } = require("./_mongodb");
 const { verifyTokenFromHeaders } = require("./_auth");
@@ -28,38 +28,15 @@ exports.handler = async function (event) {
       return { statusCode: 404, body: "Patient not found" };
     }
 
-    // Determine latest clinical info for prefill
-    let latestClinicalInfo = null;
-
-    // If you have a dedicated field:
-    if (patient.latestClinicalInfo) {
-      latestClinicalInfo = patient.latestClinicalInfo;
-    } else if (
-      Array.isArray(patient.clinicalRecords) &&
-      patient.clinicalRecords.length > 0
-    ) {
-      // Otherwise, use the last clinicalRecords entry
-      latestClinicalInfo =
-        patient.clinicalRecords[patient.clinicalRecords.length - 1];
-    } else if (
-      Array.isArray(patient.medicalHistory) &&
-      patient.medicalHistory.length > 0
-    ) {
-      // Or as fallback, maybe medicalHistory last item (if it contains clinical info)
-      latestClinicalInfo =
-        patient.medicalHistory[patient.medicalHistory.length - 1];
-    }
-
-    // Return patient info + latestClinicalInfo field
-    const responsePatient = {
-      ...patient,
-      latestClinicalInfo,
-    };
+    const medicalHistory = patient.medicalHistory || [];
+    const latestRecord = medicalHistory.length
+      ? medicalHistory[medicalHistory.length - 1]
+      : {};
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(responsePatient),
+      body: JSON.stringify(latestRecord),
     };
   } catch (err) {
     console.error(err);

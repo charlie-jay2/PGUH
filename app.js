@@ -176,14 +176,41 @@ function renderPatients(list) {
   const body = el("patientsBody");
   body.innerHTML = "";
   list.forEach((p) => {
+    // Calculate age from dateOfBirth
+    let age = "";
+    if (p.dateOfBirth) {
+      const dob = new Date(p.dateOfBirth);
+      const diff = Date.now() - dob.getTime();
+      age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+    }
+
+    // Priority label mapping
+    const priorityLabels = [
+      "0 - Minor Care",
+      "1 - Low Medium",
+      "2 - High Medium",
+      "3 - Critical Care",
+      "4 - Deceased",
+    ];
+    const priorityText =
+      p.priority !== undefined &&
+      p.priority >= 0 &&
+      p.priority < priorityLabels.length
+        ? priorityLabels[p.priority]
+        : "Unknown";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><a href="patient.html?id=${p._id}">${escapeHtml(p.patientId)}</a></td>
-      <td><a href="patient.html?id=${p._id}">${escapeHtml(p.name)}</a></td>
-      <td>${p.age ?? ""}</td>
-      <td>${escapeHtml(p.ward ?? "")}</td>
-      <td>${escapeHtml(p.notes ?? "")}</td>
-      <td class="priority-${p.priority ?? 0}">${p.priority ?? 0}</td>
+      <td>${escapeHtml(p.robloxName || "")}</td>
+      <td>${
+        p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString() : ""
+      }</td>
+      <td>${age}</td>
+      <td>${escapeHtml(p.presentingComplaint || "")}</td>
+      <td><a href="patient.html?id=${p._id}" target="_blank">${escapeHtml(
+      p.patientId || ""
+    )}</a></td>
+      <td class="priority-${p.priority ?? 0}">${priorityText}</td>
       <td>
         <button data-id="${p._id}" class="edit">Edit</button>
         <button data-id="${p._id}" class="del">Delete</button>
@@ -224,7 +251,6 @@ function escapeHtml(s = "") {
     .replaceAll("'", "&#39;");
 }
 
-el("newPatientBtn").addEventListener("click", () => openPatientForm("new"));
 el("cancelPatientBtn").addEventListener("click", () => {
   hide(el("patientForm"));
 });
@@ -235,22 +261,22 @@ function openPatientForm(mode, id) {
     mode === "new" ? "Add patient" : "Edit patient";
 
   if (mode === "new") {
+    el("patientRobloxName").value = "";
+    el("patientDOB").value = "";
     el("patientId").value = "";
-    el("patientName").value = "";
-    el("patientAge").value = "";
-    el("patientWard").value = "";
-    el("patientNotes").value = "";
+    el("patientNilByMouth").value = "";
+    el("patientComplaint").value = "";
     el("patientPriority").value = "0"; // default priority
     el("savePatientBtn").dataset.mode = "new";
     delete el("savePatientBtn").dataset.id;
   } else {
     const p = patientsCache.find((x) => x._id === id);
     if (!p) return alert("Patient not found");
+    el("patientRobloxName").value = p.robloxName || "";
+    el("patientDOB").value = p.dateOfBirth ? p.dateOfBirth.split("T")[0] : "";
     el("patientId").value = p.patientId || "";
-    el("patientName").value = p.name || "";
-    el("patientAge").value = p.age || "";
-    el("patientWard").value = p.ward || "";
-    el("patientNotes").value = p.notes || "";
+    el("patientNilByMouth").value = p.nilByMouth || "";
+    el("patientComplaint").value = p.presentingComplaint || "";
     el("patientPriority").value = (p.priority ?? 0).toString();
     el("savePatientBtn").dataset.mode = "edit";
     el("savePatientBtn").dataset.id = id;
@@ -262,11 +288,11 @@ el("savePatientBtn").addEventListener("click", async () => {
   const priorityValue = parseInt(el("patientPriority").value, 10) || 0;
 
   const payload = {
+    robloxName: el("patientRobloxName").value.trim(),
+    dateOfBirth: el("patientDOB").value,
     patientId: el("patientId").value.trim(),
-    name: el("patientName").value.trim(),
-    age: Number(el("patientAge").value || 0),
-    ward: el("patientWard").value.trim(),
-    notes: el("patientNotes").value.trim(),
+    nilByMouth: el("patientNilByMouth").value,
+    presentingComplaint: el("patientComplaint").value.trim(),
     priority: priorityValue,
   };
   try {
@@ -294,9 +320,9 @@ el("searchPatient").addEventListener("input", (ev) => {
   if (!q) return renderPatients(patientsCache);
   const filtered = patientsCache.filter(
     (p) =>
-      (p.name || "").toLowerCase().includes(q) ||
+      (p.robloxName || "").toLowerCase().includes(q) ||
       (p.patientId || "").toLowerCase().includes(q) ||
-      (p.ward || "").toLowerCase().includes(q)
+      (p.presentingComplaint || "").toLowerCase().includes(q)
   );
   renderPatients(filtered);
 });

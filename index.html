@@ -61,10 +61,6 @@
             <button id="loginBtn" type="button">Log in</button>
           </div>
         </form>
-        <div class="note">
-          First-time setup: create an account using the `registerStaff` function
-          (temporarily enabled) or seed DB.
-        </div>
       </section>
 
       <!-- DASHBOARD (hidden until logged in) -->
@@ -117,38 +113,39 @@
         <section class="panel patients">
           <h2>Patients</h2>
 
-          <div class="patient-controls">
-            <button id="newPatientBtn">Add patient</button>
-            <input
-              type="search"
-              id="searchPatient"
-              placeholder="Search patients (name, id)"
-            />
-          </div>
-
           <form id="patientForm" class="hidden form patient-form">
             <h3 id="patientFormTitle">Add patient</h3>
-            <label
-              >Patient ID (hospital)
+
+            <label>
+              ROBLOX NAME
+              <input type="text" id="patientRobloxName" required />
+            </label>
+
+            <label>
+              Date of Birth
+              <input type="date" id="patientDOB" required />
+            </label>
+
+            <label>
+              Patient ID (hospital)
               <input type="text" id="patientId" required />
             </label>
-            <label
-              >Name
-              <input type="text" id="patientName" required />
+
+            <label>
+              NIL BY MOUTH (Y/N)
+              <select id="patientNilByMouth" required>
+                <option value="">Select</option>
+                <option value="Y">Y</option>
+                <option value="N">N</option>
+              </select>
             </label>
-            <label
-              >Age
-              <input type="number" id="patientAge" min="0" />
+
+            <label>
+              Presenting Complaint
+              <input type="text" id="patientComplaint" required />
             </label>
-            <label
-              >Ward
-              <input type="text" id="patientWard" />
-            </label>
-            <label
-              >Condition / Notes
-              <textarea id="patientNotes"></textarea>
-            </label>
-            <!-- New Priority Field -->
+
+            <!-- Keep existing Priority dropdown with NHS styling -->
             <label>
               Priority
               <select id="patientPriority" class="priority-select" required>
@@ -162,6 +159,9 @@
 
             <div class="form-actions">
               <button id="savePatientBtn" type="button">Save patient</button>
+              <button id="createPatientBtn" type="button">
+                Create Patient
+              </button>
               <button id="cancelPatientBtn" type="button">Cancel</button>
             </div>
           </form>
@@ -169,11 +169,11 @@
           <table id="patientsTable" class="table">
             <thead>
               <tr>
-                <th>Patient ID</th>
-                <th>Name</th>
+                <th>Roblox Name</th>
+                <th>Date of Birth</th>
                 <th>Age</th>
-                <th>Ward</th>
-                <th>Notes</th>
+                <th>Presenting Complaint</th>
+                <th>Patient ID</th>
                 <th>Priority</th>
                 <th>Actions</th>
               </tr>
@@ -193,6 +193,7 @@
     </footer>
 
     <script src="app.js"></script>
+
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         setInterval(async () => {
@@ -206,6 +207,78 @@
             console.error("Auto-refresh error:", err);
           }
         }, 10000);
+
+        // Create Patient button handler
+        document
+          .getElementById("createPatientBtn")
+          .addEventListener("click", async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+              alert("Please log in first");
+              return;
+            }
+
+            const robloxName = document
+              .getElementById("patientRobloxName")
+              .value.trim();
+            const dateOfBirth = document.getElementById("patientDOB").value;
+            const patientId = document.getElementById("patientId").value.trim();
+            const nilByMouth =
+              document.getElementById("patientNilByMouth").value;
+            const presentingComplaint = document
+              .getElementById("patientComplaint")
+              .value.trim();
+            const priority = parseInt(
+              document.getElementById("patientPriority").value,
+              10
+            );
+
+            if (
+              !robloxName ||
+              !dateOfBirth ||
+              !patientId ||
+              !nilByMouth ||
+              !presentingComplaint ||
+              isNaN(priority)
+            ) {
+              alert("Please fill out all required fields.");
+              return;
+            }
+
+            try {
+              const res = await fetch("/.netlify/functions/createPatient", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  robloxName,
+                  dateOfBirth,
+                  patientId,
+                  nilByMouth,
+                  presentingComplaint,
+                  priority,
+                }),
+              });
+
+              if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || "Failed to create patient");
+              }
+
+              const data = await res.json();
+              alert("Patient created successfully!");
+              document.getElementById("patientForm").reset();
+
+              // Reload patients list - assuming you have a function for that
+              if (typeof loadPatients === "function") {
+                await loadPatients();
+              }
+            } catch (err) {
+              alert("Error creating patient: " + err.message);
+            }
+          });
       });
     </script>
   </body>
