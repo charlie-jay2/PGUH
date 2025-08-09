@@ -29,11 +29,20 @@ exports.handler = async function (event) {
 
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
       body: JSON.stringify({ objectId: patient._id.toString() }),
     };
   } catch (err) {
     console.error(err);
-    return { statusCode: 500, body: "Server error" };
+    return {
+      statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: "Server error",
+    };
   }
 };
