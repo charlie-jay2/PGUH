@@ -26,14 +26,6 @@ body {
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
-.topbar {
-  background: linear-gradient(90deg, var(--nhs-blue), var(--accent));
-  color: white;
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 .brand {
   font-weight: 700;
 }
@@ -643,4 +635,9 @@ footer.footer {
   background-color: var(--accent);
   outline: none;
   box-shadow: 0 0 8px var(--accent);
+}
+
+.topbarimg {
+  width: 100%;
+  height: auto;
 }
