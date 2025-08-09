@@ -173,7 +173,26 @@
     <footer class="footer">
       Copyright 2025 © Prince Georges University Hospital
     </footer>
+    <footer class="footer">
+      This website is not an official National Health Service website, this is
+      just for roleplay purposes and do not intend for real life usage.
+    </footer>
 
     <script src="app.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        setInterval(async () => {
+          const token = localStorage.getItem("token");
+          if (!token) return;
+          try {
+            await loadHospital();
+            await loadPatients();
+            console.log("Data refreshed:", new Date().toLocaleTimeString());
+          } catch (err) {
+            console.error("Auto-refresh error:", err);
+          }
+        }, 10000);
+      });
+    </script>
   </body>
 </html>
