@@ -1,7 +1,6 @@
 // netlify/functions/getPatientById.js
 
 const { connectToDatabase } = require("./_mongodb");
-const { verifyTokenFromHeaders } = require("./_auth");
 const { ObjectId } = require("mongodb");
 
 exports.handler = async function (event) {
@@ -10,7 +9,7 @@ exports.handler = async function (event) {
   }
 
   try {
-    verifyTokenFromHeaders(event.headers);
+    // Removed token verification
 
     const id = event.queryStringParameters && event.queryStringParameters.id;
     if (!id) {
@@ -31,26 +30,22 @@ exports.handler = async function (event) {
     // Determine latest clinical info for prefill
     let latestClinicalInfo = null;
 
-    // If you have a dedicated field:
     if (patient.latestClinicalInfo) {
       latestClinicalInfo = patient.latestClinicalInfo;
     } else if (
       Array.isArray(patient.clinicalRecords) &&
       patient.clinicalRecords.length > 0
     ) {
-      // Otherwise, use the last clinicalRecords entry
       latestClinicalInfo =
         patient.clinicalRecords[patient.clinicalRecords.length - 1];
     } else if (
       Array.isArray(patient.medicalHistory) &&
       patient.medicalHistory.length > 0
     ) {
-      // Or as fallback, maybe medicalHistory last item (if it contains clinical info)
       latestClinicalInfo =
         patient.medicalHistory[patient.medicalHistory.length - 1];
     }
 
-    // Return patient info + latestClinicalInfo field
     const responsePatient = {
       ...patient,
       latestClinicalInfo,
@@ -63,8 +58,7 @@ exports.handler = async function (event) {
     };
   } catch (err) {
     console.error(err);
-    const status =
-      err.code === "NO_AUTH" || err.code === "INVALID_TOKEN" ? 401 : 500;
-    return { statusCode: status, body: String(err.message) };
+    // Simplified error handling - no auth errors
+    return { statusCode: 500, body: String(err.message) };
   }
 };
