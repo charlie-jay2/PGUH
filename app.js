@@ -183,6 +183,7 @@ function renderPatients(list) {
       <td>${p.age ?? ""}</td>
       <td>${escapeHtml(p.ward ?? "")}</td>
       <td>${escapeHtml(p.notes ?? "")}</td>
+      <td class="priority-${p.priority ?? 0}">${p.priority ?? 0}</td>
       <td>
         <button data-id="${p._id}" class="edit">Edit</button>
         <button data-id="${p._id}" class="del">Delete</button>
@@ -232,12 +233,14 @@ function openPatientForm(mode, id) {
   show(el("patientForm"));
   el("patientFormTitle").innerText =
     mode === "new" ? "Add patient" : "Edit patient";
+
   if (mode === "new") {
     el("patientId").value = "";
     el("patientName").value = "";
     el("patientAge").value = "";
     el("patientWard").value = "";
     el("patientNotes").value = "";
+    el("patientPriority").value = "0"; // default priority
     el("savePatientBtn").dataset.mode = "new";
     delete el("savePatientBtn").dataset.id;
   } else {
@@ -248,6 +251,7 @@ function openPatientForm(mode, id) {
     el("patientAge").value = p.age || "";
     el("patientWard").value = p.ward || "";
     el("patientNotes").value = p.notes || "";
+    el("patientPriority").value = (p.priority ?? 0).toString();
     el("savePatientBtn").dataset.mode = "edit";
     el("savePatientBtn").dataset.id = id;
   }
@@ -255,12 +259,15 @@ function openPatientForm(mode, id) {
 
 el("savePatientBtn").addEventListener("click", async () => {
   const mode = el("savePatientBtn").dataset.mode || "new";
+  const priorityValue = parseInt(el("patientPriority").value, 10) || 0;
+
   const payload = {
     patientId: el("patientId").value.trim(),
     name: el("patientName").value.trim(),
     age: Number(el("patientAge").value || 0),
     ward: el("patientWard").value.trim(),
     notes: el("patientNotes").value.trim(),
+    priority: priorityValue,
   };
   try {
     if (mode === "new") {

@@ -37,7 +37,8 @@
 
   <body>
     <header class="topbar">
-      <div class="brand">NHS — Prince Georges University Hospital</div>
+      <img src="./Assets/logo.png" class="logo" />
+      <div class="brand">Prince Georges University Hospital</div>
       <div class="meta" id="metaArea">
         <!-- filled by JS -->
       </div>
@@ -147,6 +148,18 @@
               >Condition / Notes
               <textarea id="patientNotes"></textarea>
             </label>
+            <!-- New Priority Field -->
+            <label>
+              Priority
+              <select id="patientPriority" class="priority-select" required>
+                <option value="0">0 - Minor Care</option>
+                <option value="1">1 - Low Medium</option>
+                <option value="2">2 - High Medium</option>
+                <option value="3">3 - Critical Care</option>
+                <option value="4">4 - Deceased</option>
+              </select>
+            </label>
+
             <div class="form-actions">
               <button id="savePatientBtn" type="button">Save patient</button>
               <button id="cancelPatientBtn" type="button">Cancel</button>
@@ -161,6 +174,7 @@
                 <th>Age</th>
                 <th>Ward</th>
                 <th>Notes</th>
+                <th>Priority</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -171,7 +185,7 @@
     </main>
 
     <footer class="footer">
-      Copyright 2025 © Prince Georges University Hospital
+      Copyright 2025 © Prince George University Hospital
     </footer>
     <footer class="footer">
       This website is not an official National Health Service website, this is
