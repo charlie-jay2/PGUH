@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel — NHS Staff Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <img src="./Assets/logo.png" class="logo" />
+      <div class="brand">Prince Georges University Hospital — Admin</div>
+      <div class="meta" id="metaArea"></div>
+    </header>
+
+    <main class="container" id="mainContainer">
+      <section id="noAccess" class="hidden">
+        <h2>Insufficient permissions</h2>
+        <p>You do not have access to this page.</p>
+      </section>
+
+      <section id="adminPanel" class="hidden" style="display: flex; gap: 32px">
+        <div
+          id="usersSection"
+          class="panel"
+          style="flex: 1; display: flex; flex-direction: column"
+        >
+          <h2 style="margin-top: 0; color: var(--nhs-blue); font-weight: 700">
+            All Users
+          </h2>
+          <table
+            class="table"
+            id="usersTable"
+            style="flex-grow: 1; min-height: 400px"
+          >
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+
+        <div
+          id="createUserSection"
+          class="panel"
+          style="width: 350px; display: flex; flex-direction: column"
+        >
+          <h2 style="margin-top: 0; color: var(--nhs-blue); font-weight: 700">
+            Create New User
+          </h2>
+          <form
+            id="createUserForm"
+            class="form"
+            style="display: flex; flex-direction: column; gap: 16px"
+          >
+            <label>
+              Username
+              <input type="text" id="newUsername" required />
+            </label>
+            <label>
+              Password
+              <input type="password" id="newPassword" required />
+            </label>
+            <label>
+              Role
+              <select id="newRole" required>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+            <label>
+              Email
+              <input type="email" id="newEmail" required />
+            </label>
+            <div
+              class="form-actions"
+              style="justify-content: flex-end; margin-top: 8px"
+            >
+              <button
+                type="button"
+                id="createUserBtn"
+                style="
+                  background-color: var(--nhs-blue);
+                  color: white;
+                  border: none;
+                  padding: 12px 20px;
+                  border-radius: var(--radius);
+                  cursor: pointer;
+                  font-weight: 700;
+                  font-size: 1rem;
+                  transition: background-color 0.3s ease;
+                "
+              >
+                Create User
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">© 2025 Prince George University Hospital</footer>
+
+    <script>
+      const token = localStorage.getItem("token");
+      const apiBase = "/.netlify/functions";
+
+      async function checkAccess() {
+        if (!token) {
+          document.getElementById("noAccess").classList.remove("hidden");
+          return;
+        }
+
+        const res = await fetch(`${apiBase}/getUsers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.status === 403) {
+          document.getElementById("noAccess").classList.remove("hidden");
+          return;
+        }
+
+        const data = await res.json();
+        document.getElementById("adminPanel").classList.remove("hidden");
+        populateUsers(data.users);
+      }
+
+      function populateUsers(users) {
+        const body = document.getElementById("usersBody");
+        body.innerHTML = "";
+        users.forEach((u) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${u.username}</td>
+            <td>${u.email || ""}</td>
+            <td>${u.role}</td>
+            <td>
+              <button onclick="resetPassword('${u.username}', '${
+            u.email
+          }')">Reset Password</button>
+              <button onclick="deleteUser('${u.username}', '${
+            u.email
+          }')">Delete</button>
+            </td>
+          `;
+          body.appendChild(tr);
+        });
+      }
+
+      async function resetPassword(username, email) {
+        const newPass = prompt(`Enter new password for ${username}:`);
+        if (!newPass) return;
+
+        const res = await fetch(`${apiBase}/resetPassword`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username, password: newPass, email }),
+        });
+
+        alert(await res.text());
+      }
+
+      async function deleteUser(username, email) {
+        if (
+          !confirm(
+            `Are you sure you want to delete user '${username}'? This action cannot be undone.`
+          )
+        )
+          return;
+
+        const res = await fetch(`${apiBase}/deleteUser`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username, email }),
+        });
+
+        const text = await res.text();
+        alert(text);
+        checkAccess();
+      }
+
+      document
+        .getElementById("createUserBtn")
+        .addEventListener("click", async () => {
+          const username = document.getElementById("newUsername").value;
+          const password = document.getElementById("newPassword").value;
+          const role = document.getElementById("newRole").value;
+          const email = document.getElementById("newEmail").value;
+
+          const res = await fetch(`${apiBase}/createUser`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ username, password, role, email }),
+          });
+
+          alert(await res.text());
+          checkAccess();
+        });
+
+      checkAccess();
+    </script>
+  </body>
+</html>

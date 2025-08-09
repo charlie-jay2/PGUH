@@ -300,3 +300,80 @@ select.priority-select option[value="4"] {
   width: 5%;
   height: auto;
 }
+
+/* Style for the adminPanel sections */
+#adminPanel {
+  display: flex;
+  gap: 32px;
+}
+
+/* Panel style reused for user table and create form */
+.panel {
+  background: var(--panel);
+  border: 1px solid #d7dce9;
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+}
+
+/* Table styling - keep full width inside panel */
+#usersTable {
+  width: 100%;
+  min-height: 400px; /* keep table tall */
+  border-collapse: collapse;
+}
+
+/* Table header */
+#usersTable thead th {
+  background: #f1f6fb;
+  padding: 10px;
+  text-align: left;
+}
+
+/* Table cells */
+#usersTable td,
+#usersTable th {
+  padding: 10px;
+  border-bottom: 1px solid #f1f4f8;
+}
+
+/* Table row hover effect */
+#usersTable tbody tr:hover {
+  background: #fcfdff;
+}
+
+/* Form styling overrides */
+#adminPanel form.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Style inputs and select with consistent NHS style */
+#adminPanel input,
+#adminPanel select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #d7dce9;
+  background: white;
+  font-family: "Frutiger", Arial, sans-serif;
+  font-size: 1rem;
+  color: var(--nhs-dark);
+}
+
+/* Button style */
+#adminPanel button#createUserBtn {
+  background-color: var(--nhs-blue);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+#adminPanel button#createUserBtn:hover {
+  background-color: var(--accent);
+}
