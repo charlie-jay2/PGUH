@@ -1,126 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Careers Admin Panel — PGUH</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header class="topbar">
-    <img src="./Assets/logo.png" class="logo" alt="PGUH Logo" />
-    <div class="brand">Prince George University Hospital — Careers Admin</div>
-    <div class="meta" id="metaArea"></div>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Careers Admin Panel — PGUH</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      name="description"
+      content="Prince Georges University Hospital — Official Roblox Prince Georges Hospital | Apart of the National Health Service"
+    />
 
-  <main class="container" id="mainContainer">
-    <section id="noAccess" class="hidden">
-      <h2>Insufficient permissions</h2>
-      <p>You do not have access to this page.</p>
-    </section>
+    <meta property="og:title" content="Prince Georges University Hospital" />
+    <meta
+      property="og:description"
+      content="Official Roblox Prince Georges Hospital | Apart of the National Health Service"
+    />
+    <meta
+      property="og:image"
+      content="https://princegeorgesuniversityhospital.netlify.app/Assets/logo.png"
+    />
+    <meta property="og:type" content="website" />
 
-    <section id="adminPanel" class="hidden">
-      <div
-        id="applicationsSection"
-        class="panel"
-        style="flex: 1; display: flex; flex-direction: column"
-      >
-        <h2 style="margin-top: 0; color: var(--nhs-blue); font-weight: 700">
-          Job Applications
-        </h2>
-        <table
-          class="table"
-          id="applicationsTable"
-          style="flex-grow: 1; min-height: 400px"
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Prince Georges University Hospital" />
+    <meta
+      name="twitter:description"
+      content="Official Roblox Prince Georges Hospital | Apart of the National Health Service"
+    />
+    <meta
+      name="twitter:image"
+      content="https://princegeorgesuniversityhospital.netlify.app/Assets/logo.png"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <img src="./Assets/logo.png" class="logo" alt="PGUH Logo" />
+      <div class="brand">Prince George University Hospital — Careers Admin</div>
+      <div class="meta" id="metaArea"></div>
+    </header>
+
+    <main class="container" id="mainContainer">
+      <section id="noAccess" class="hidden">
+        <h2>Insufficient permissions</h2>
+        <p>You do not have access to this page.</p>
+      </section>
+
+      <section id="adminPanel" class="hidden">
+        <div
+          id="applicationsSection"
+          class="panel"
+          style="flex: 1; display: flex; flex-direction: column"
         >
-          <thead>
-            <tr>
-              <th>Applicant Name</th>
-              <th>Discord Username</th>
-              <th>Roblox Profile</th>
-              <th>Role Applied For</th>
-              <th>Motivation</th>
-              <th>What Makes You Stand Out?</th>
-              <th>Experience</th>
-              <th>Scenario Questions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="applicationsBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+          <h2 style="margin-top: 0; color: var(--nhs-blue); font-weight: 700">
+            Job Applications
+          </h2>
+          <table
+            class="table"
+            id="applicationsTable"
+            style="flex-grow: 1; min-height: 400px"
+          >
+            <thead>
+              <tr>
+                <th>Applicant Name</th>
+                <th>Discord Username</th>
+                <th>Roblox Profile</th>
+                <th>Role Applied For</th>
+                <th>Motivation</th>
+                <th>What Makes You Stand Out?</th>
+                <th>Experience</th>
+                <th>Scenario Questions</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
 
-  <footer class="footer">© 2025 Prince George University Hospital</footer>
+    <footer class="footer">© 2025 Prince George University Hospital</footer>
 
-  <script>
-    const token = localStorage.getItem("token");
-    const apiBase = "/.netlify/functions";
+    <script>
+      const token = localStorage.getItem("token");
+      const apiBase = "/.netlify/functions";
 
-    async function checkAccess() {
-      if (!token) {
-        document.getElementById("noAccess").classList.remove("hidden");
-        return;
+      async function checkAccess() {
+        if (!token) {
+          document.getElementById("noAccess").classList.remove("hidden");
+          return;
+        }
+
+        // Fetch application responses from getResponses.js
+        const res = await fetch(`${apiBase}/getResponses`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.status === 403) {
+          document.getElementById("noAccess").classList.remove("hidden");
+          return;
+        }
+
+        if (!res.ok) {
+          alert("Failed to fetch applications. Please try again later.");
+          return;
+        }
+
+        const data = await res.json();
+        document.getElementById("adminPanel").classList.remove("hidden");
+        populateApplications(data.applications || []);
       }
 
-      // Fetch application responses from getResponses.js
-      const res = await fetch(`${apiBase}/getResponses`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.status === 403) {
-        document.getElementById("noAccess").classList.remove("hidden");
-        return;
+      function escapeHtml(text) {
+        if (!text) return "";
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
       }
 
-      if (!res.ok) {
-        alert("Failed to fetch applications. Please try again later.");
-        return;
-      }
+      function populateApplications(applications) {
+        const body = document.getElementById("applicationsBody");
+        body.innerHTML = "";
 
-      const data = await res.json();
-      document.getElementById("adminPanel").classList.remove("hidden");
-      populateApplications(data.applications || []);
-    }
-
-    function escapeHtml(text) {
-      if (!text) return "";
-      return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function populateApplications(applications) {
-      const body = document.getElementById("applicationsBody");
-      body.innerHTML = "";
-
-      if (applications.length === 0) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="9" style="text-align:center; font-style: italic; color: var(--muted);">
+        if (applications.length === 0) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td colspan="9" style="text-align:center; font-style: italic; color: var(--muted);">
           No applications found.
         </td>`;
-        body.appendChild(tr);
-        return;
-      }
+          body.appendChild(tr);
+          return;
+        }
 
-      applications.forEach((app) => {
-        const tr = document.createElement("tr");
+        applications.forEach((app) => {
+          const tr = document.createElement("tr");
 
-        // Format scenario questions answers as a single block with line breaks
-        const scenarioHtml = Object.entries(app.scenarioAnswers || {})
-          .map(
-            ([question, answer]) =>
-              `<strong>${escapeHtml(question)}:</strong><br>${escapeHtml(
-                answer
-              )}<br><br>`
-          )
-          .join("");
+          // Format scenario questions answers as a single block with line breaks
+          const scenarioHtml = Object.entries(app.scenarioAnswers || {})
+            .map(
+              ([question, answer]) =>
+                `<strong>${escapeHtml(question)}:</strong><br>${escapeHtml(
+                  answer
+                )}<br><br>`
+            )
+            .join("");
 
-        tr.innerHTML = `
+          tr.innerHTML = `
           <td>${escapeHtml(app.robloxName)}</td>
           <td>${escapeHtml(app.discordUsername)}</td>
           <td><a href="${escapeHtml(
@@ -138,31 +164,32 @@
             </button>
           </td>
         `;
-        body.appendChild(tr);
-      });
-    }
-
-    async function deleteApplication(id) {
-      if (!confirm("Are you sure you want to delete this application?")) return;
-
-      const res = await fetch(`${apiBase}/deleteResponse`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ id }),
-      });
-
-      if (res.ok) {
-        alert("Application deleted.");
-        checkAccess();
-      } else {
-        alert("Failed to delete application.");
+          body.appendChild(tr);
+        });
       }
-    }
 
-    checkAccess();
-  </script>
-</body>
+      async function deleteApplication(id) {
+        if (!confirm("Are you sure you want to delete this application?"))
+          return;
+
+        const res = await fetch(`${apiBase}/deleteResponse`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id }),
+        });
+
+        if (res.ok) {
+          alert("Application deleted.");
+          checkAccess();
+        } else {
+          alert("Failed to delete application.");
+        }
+      }
+
+      checkAccess();
+    </script>
+  </body>
 </html>
