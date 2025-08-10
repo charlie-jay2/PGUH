@@ -3,35 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>NHS Staff Dashboard — Hospital Admin</title>
+    <title>Prince Georges University Hospital — Patient Check-In</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="Assets/favicon.ico" type="image/x-icon" />
-
     <meta
       name="description"
-      content="Prince Georges University Hospital — Official Roblox Prince Georges Hospital | Apart of the National Health Service"
-    />
-
-    <meta property="og:title" content="Prince Georges University Hospital" />
-    <meta
-      property="og:description"
-      content="Official Roblox Prince Georges Hospital | Apart of the National Health Service"
-    />
-    <meta
-      property="og:image"
-      content="https://princegeorgesuniversityhospital.netlify.app/Assets/logo.png"
-    />
-    <meta property="og:type" content="website" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Prince Georges University Hospital" />
-    <meta
-      name="twitter:description"
-      content="Official Roblox Prince Georges Hospital | Apart of the National Health Service"
-    />
-    <meta
-      name="twitter:image"
-      content="https://princegeorgesuniversityhospital.netlify.app/Assets/logo.png"
+      content="Prince Georges University Hospital — Roleplay check-in"
     />
   </head>
 
@@ -39,247 +16,257 @@
     <header class="topbar">
       <img src="./Assets/logo.png" class="logo" />
       <div class="brand">Prince Georges University Hospital</div>
-      <div class="meta" id="metaArea">
-        <!-- filled by JS -->
-      </div>
+      <div class="meta" id="metaArea"></div>
     </header>
 
-    <!-- LOGIN -->
-    <main class="container" id="mainContainer">
-      <section id="loginPanel" class="panel login-panel">
-        <h2>Staff Login</h2>
-        <form id="loginForm" class="form">
-          <label
-            >Username
-            <input type="text" id="loginUsername" required />
+    <main class="container">
+      <section id="checkinPanel" class="panel">
+        <h2>Patient Self Check-In</h2>
+
+        <div id="authArea" class="auth-area">
+          <p id="welcomeText">Sign in with Roblox to start check-in.</p>
+          <button id="loginRobloxBtn">Sign in with Roblox</button>
+          <button id="logoutBtn" style="display: none">Sign out</button>
+        </div>
+
+        <form id="checkinForm" class="form hidden">
+          <label>
+            Roblox Username
+            <input type="text" id="patientRobloxName" readonly />
           </label>
-          <label
-            >Password
-            <input type="password" id="loginPassword" required />
+
+          <label>
+            Date of Birth
+            <input type="date" id="patientDOB" required />
           </label>
+
+          <label>
+            Presenting Complaint
+            <input type="text" id="patientComplaint" required />
+          </label>
+
           <div class="form-actions">
-            <button id="loginBtn" type="button">Log in</button>
+            <button id="createPatientBtn" type="button">Check in</button>
+            <button id="cancelBtn" type="button">Cancel</button>
           </div>
         </form>
-      </section>
 
-      <!-- DASHBOARD (hidden until logged in) -->
-      <section id="dashboard" class="hidden">
-        <section class="panel hospital-overview">
-          <h2>Hospital Overview</h2>
-          <div class="stats">
-            <div class="stat">
-              <div class="stat-label">Wait time</div>
-              <div id="waitTime" class="stat-value">—</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Beds available</div>
-              <div id="bedsAvailable" class="stat-value">—</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Total beds</div>
-              <div id="totalBeds" class="stat-value">—</div>
-            </div>
-            <div class="stat small">
-              <div class="stat-label">Last updated</div>
-              <div id="lastUpdated" class="stat-value">—</div>
-            </div>
-          </div>
-
-          <div class="controls">
-            <button id="editHospitalBtn">Edit hospital data</button>
-          </div>
-
-          <form id="hospitalForm" class="hidden form">
-            <label
-              >Wait time (mins)
-              <input type="number" id="inputWaitTime" min="0" />
-            </label>
-            <label
-              >Beds available
-              <input type="number" id="inputBedsAvailable" min="0" />
-            </label>
-            <label
-              >Total beds
-              <input type="number" id="inputTotalBeds" min="0" />
-            </label>
-            <div class="form-actions">
-              <button id="saveHospitalBtn" type="button">Save</button>
-              <button id="cancelHospitalBtn" type="button">Cancel</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="panel patients">
-          <h2>Patients</h2>
-
-          <form id="patientForm" class="hidden form patient-form">
-            <h3 id="patientFormTitle">Add patient</h3>
-
-            <label>
-              ROBLOX NAME
-              <input type="text" id="patientRobloxName" required />
-            </label>
-
-            <label>
-              Date of Birth
-              <input type="date" id="patientDOB" required />
-            </label>
-
-            <label>
-              Patient ID (hospital)
-              <input type="text" id="patientId" required />
-            </label>
-
-            <label>
-              NIL BY MOUTH (Y/N)
-              <select id="patientNilByMouth" required>
-                <option value="">Select</option>
-                <option value="Y">Y</option>
-                <option value="N">N</option>
-              </select>
-            </label>
-
-            <label>
-              Presenting Complaint
-              <input type="text" id="patientComplaint" required />
-            </label>
-
-            <!-- Keep existing Priority dropdown with NHS styling -->
-            <label>
-              Priority
-              <select id="patientPriority" class="priority-select" required>
-                <option value="0">0 - Minor Care</option>
-                <option value="1">1 - Low Medium</option>
-                <option value="2">2 - High Medium</option>
-                <option value="3">3 - Critical Care</option>
-                <option value="4">4 - Deceased</option>
-              </select>
-            </label>
-
-            <div class="form-actions">
-              <button id="savePatientBtn" type="button">Save patient</button>
-              <button id="createPatientBtn" type="button">
-                Create Patient
-              </button>
-              <button id="cancelPatientBtn" type="button">Cancel</button>
-            </div>
-          </form>
-
-          <table id="patientsTable" class="table">
-            <thead>
-              <tr>
-                <th>Roblox Name</th>
-                <th>Date of Birth</th>
-                <th>Age</th>
-                <th>Presenting Complaint</th>
-                <th>Patient ID</th>
-                <th>Priority</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="patientsBody"></tbody>
-          </table>
-        </section>
+        <div id="afterCheckin" class="hidden">
+          <h3>Check-in successful</h3>
+          <p>
+            Your generated Patient ID: <strong id="generatedPatientId"></strong>
+          </p>
+          <p>Staff will set Nil-by-Mouth and Priority after triage.</p>
+        </div>
       </section>
     </main>
 
     <footer class="footer">
-      Copyright 2025 © Prince George University Hospital
+      Copyright 2025 © Prince George University Hospital — Roleplay only.
     </footer>
-    <footer class="footer">
-      This website is not an official National Health Service website, this is
-      just for roleplay purposes and do not intend for real life usage.
-    </footer>
-
-    <script src="app.js"></script>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        setInterval(async () => {
-          const token = localStorage.getItem("token");
-          if (!token) return;
-          try {
-            await loadHospital();
-            await loadPatients();
-            console.log("Data refreshed:", new Date().toLocaleTimeString());
-          } catch (err) {
-            console.error("Auto-refresh error:", err);
-          }
-        }, 10000);
+      // --------- CONFIG ----------
+      // Set this to the redirect URI you register in Roblox Creator Hub (must match exactly)
+      const REDIRECT_URI = window.location.origin + window.location.pathname; // current page
+      // Your Roblox OAuth client_id (public) — set via server or allowed to appear here (client secret must NOT)
+      const CLIENT_ID = "YOUR_ROBLOX_CLIENT_ID"; // <-- replace with your client id
 
-        // Create Patient button handler
-        document
-          .getElementById("createPatientBtn")
-          .addEventListener("click", async () => {
-            const token = localStorage.getItem("token");
-            if (!token) {
-              alert("Please log in first");
-              return;
-            }
+      // Scopes: openid & profile give user info via userinfo endpoint
+      const OAUTH_SCOPES = "openid profile";
 
-            const robloxName = document
-              .getElementById("patientRobloxName")
-              .value.trim();
-            const dateOfBirth = document.getElementById("patientDOB").value;
-            const patientId = document.getElementById("patientId").value.trim();
-            const nilByMouth =
-              document.getElementById("patientNilByMouth").value;
-            const presentingComplaint = document
-              .getElementById("patientComplaint")
-              .value.trim();
-            const priority = parseInt(
-              document.getElementById("patientPriority").value,
-              10
-            );
+      // ----------------------------
 
-            if (
-              !robloxName ||
-              !dateOfBirth ||
-              !patientId ||
-              !nilByMouth ||
-              !presentingComplaint ||
-              isNaN(priority)
-            ) {
-              alert("Please fill out all required fields.");
-              return;
-            }
+      const loginBtn = document.getElementById("loginRobloxBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const welcomeText = document.getElementById("welcomeText");
+      const checkinForm = document.getElementById("checkinForm");
+      const authArea = document.getElementById("authArea");
+      const afterCheckin = document.getElementById("afterCheckin");
 
-            try {
-              const res = await fetch("/.netlify/functions/createPatient", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                  robloxName,
-                  dateOfBirth,
-                  patientId,
-                  nilByMouth,
-                  presentingComplaint,
-                  priority,
-                }),
-              });
+      function buildAuthUrl() {
+        const params = new URLSearchParams({
+          client_id: CLIENT_ID,
+          response_type: "code",
+          redirect_uri: REDIRECT_URI,
+          scope: OAUTH_SCOPES,
+          // state could be added for CSRF protection — consider adding a server-generated state
+        });
+        // Roblox advice: use their authorize endpoint; your server will later exchange the "code".
+        // The exact authorize base is taken from Roblox docs: fetch their OIDC config, etc.
+        // We redirect to Roblox's authorization endpoint.
+        return `https://apis.roblox.com/oauth/v1/authorize?${params.toString()}`;
+      }
 
-              if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(errorText || "Failed to create patient");
-              }
-
-              const data = await res.json();
-              alert("Patient created successfully!");
-              document.getElementById("patientForm").reset();
-
-              // Reload patients list - assuming you have a function for that
-              if (typeof loadPatients === "function") {
-                await loadPatients();
-              }
-            } catch (err) {
-              alert("Error creating patient: " + err.message);
-            }
-          });
+      loginBtn.addEventListener("click", () => {
+        // Redirect to Roblox authorization page
+        window.location.href = buildAuthUrl();
       });
+
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("roblox_user");
+        location.href = REDIRECT_URI; // reload clearing query params
+      });
+
+      // Utility: generate random 6-digit numeric string
+      function generatePatientId() {
+        const num = Math.floor(Math.random() * 1_000_000);
+        return String(num).padStart(6, "0");
+      }
+
+      // Show user UI
+      function showSignedInUI(user) {
+        welcomeText.textContent = `Signed in as ${user.username}`;
+        document.getElementById("patientRobloxName").value = user.username;
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+        checkinForm.classList.remove("hidden");
+        afterCheckin.classList.add("hidden");
+      }
+
+      function showSignedOutUI() {
+        welcomeText.textContent = "Sign in with Roblox to start check-in.";
+        document.getElementById("patientRobloxName").value = "";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+        checkinForm.classList.add("hidden");
+        afterCheckin.classList.add("hidden");
+      }
+
+      // On page load: detect OAuth callback ?code=...
+      async function handleOAuthCallback() {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        if (!code) {
+          // no code - use any stored user
+          const stored = localStorage.getItem("roblox_user");
+          if (stored) {
+            try {
+              const user = JSON.parse(stored);
+              showSignedInUI(user);
+            } catch {
+              showSignedOutUI();
+            }
+          } else {
+            showSignedOutUI();
+          }
+          return;
+        }
+
+        // We have a code: exchange it server-side via your Netlify function.
+        try {
+          // POST code to serverless function that exchanges code for tokens and returns user info
+          const res = await fetch("/.netlify/functions/exchangeRobloxCode", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
+          });
+
+          if (!res.ok) {
+            const txt = await res.text();
+            throw new Error(txt || "Failed to exchange code");
+          }
+
+          const payload = await res.json();
+          // Expect payload like { username: 'FooBar', id: '12345', ... }
+          const user = {
+            username:
+              payload.username ||
+              payload.preferred_username ||
+              payload.name ||
+              payload.displayName ||
+              "Unknown",
+            id: payload.sub || payload.user_id || payload.id || null,
+            raw: payload,
+          };
+
+          localStorage.setItem("roblox_user", JSON.stringify(user));
+
+          // Remove code param from URL (clean up)
+          url.searchParams.delete("code");
+          history.replaceState({}, document.title, url.toString());
+
+          showSignedInUI(user);
+        } catch (err) {
+          console.error("OAuth exchange error:", err);
+          alert("Sign in failed: " + (err.message || err));
+          showSignedOutUI();
+        }
+      }
+
+      // Create patient handler
+      document
+        .getElementById("createPatientBtn")
+        .addEventListener("click", async () => {
+          const stored = localStorage.getItem("roblox_user");
+          if (!stored) {
+            alert("Please sign in with Roblox first.");
+            return;
+          }
+          const user = JSON.parse(stored);
+          const dob = document.getElementById("patientDOB").value;
+          const complaint = document
+            .getElementById("patientComplaint")
+            .value.trim();
+
+          if (!dob || !complaint) {
+            alert("Please fill in Date of Birth and Presenting Complaint.");
+            return;
+          }
+
+          // Generate 6-digit patient id
+          const patientId = generatePatientId();
+
+          // Build patient payload - omit nilByMouth & priority
+          const payload = {
+            robloxName: user.username,
+            dateOfBirth: dob,
+            patientId: patientId,
+            presentingComplaint: complaint,
+          };
+
+          try {
+            // Call your existing createPatient serverless function
+            const token = localStorage.getItem("token"); // optional if your createPatient uses auth
+            const res = await fetch("/.netlify/functions/createPatient", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+              const txt = await res.text();
+              throw new Error(txt || "Failed to create patient");
+            }
+
+            const data = await res.json();
+
+            // Show confirmation and patient id
+            document.getElementById("generatedPatientId").textContent =
+              patientId;
+            afterCheckin.classList.remove("hidden");
+            checkinForm.classList.add("hidden");
+
+            // optionally clear inputs
+            document.getElementById("patientDOB").value = "";
+            document.getElementById("patientComplaint").value = "";
+          } catch (err) {
+            console.error("Create patient error:", err);
+            alert("Could not create patient: " + (err.message || err));
+          }
+        });
+
+      document.getElementById("cancelBtn").addEventListener("click", () => {
+        // clear and sign out (optional)
+        localStorage.removeItem("roblox_user");
+        showSignedOutUI();
+      });
+
+      // Run on start
+      handleOAuthCallback();
     </script>
   </body>
 </html>
