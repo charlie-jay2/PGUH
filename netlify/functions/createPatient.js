@@ -1,13 +1,11 @@
 // createPatient.js
 const { connectToDatabase } = require("./_mongodb");
-const { verifyTokenFromHeaders } = require("./_auth");
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST")
     return { statusCode: 405, body: "Method not allowed" };
 
   try {
-    const user = verifyTokenFromHeaders(event.headers);
     const payload = JSON.parse(event.body || "{}");
 
     const record = {
@@ -16,12 +14,12 @@ exports.handler = async function (event) {
       patientId: payload.patientId || "",
       nilByMouth: payload.nilByMouth || "", // NEW field ('Y' or 'N')
       presentingComplaint: payload.presentingComplaint || "", // NEW field
-      name: payload.name || "", // you might want to remove this if unused
-      age: payload.age ?? null, // optional, if you still want to keep
+      name: payload.name || "", // Optional
+      age: payload.age ?? null,
       ward: payload.ward || "",
       notes: payload.notes || "",
       priority: Number.isInteger(payload.priority) ? payload.priority : 0,
-      createdBy: user.username || user.id || "unknown",
+      createdBy: payload.createdBy || "unknown",
       createdAt: new Date().toISOString(),
     };
 
@@ -39,8 +37,6 @@ exports.handler = async function (event) {
     };
   } catch (err) {
     console.error(err);
-    const status =
-      err.code === "NO_AUTH" || err.code === "INVALID_TOKEN" ? 401 : 500;
-    return { statusCode: status, body: String(err.message) };
+    return { statusCode: 500, body: String(err.message) };
   }
 };

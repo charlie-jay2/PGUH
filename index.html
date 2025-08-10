@@ -1,238 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Prince Georges University Hospital — Patient Check-In</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="Assets/favicon.ico" type="image/x-icon" />
-    <meta
-      name="description"
-      content="Prince Georges University Hospital — Roleplay check-in"
-    />
-  </head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Patient Check-in | PGUH</title>
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+      /* Modal styles */
+      #successModal {
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
 
+        display: none; /* Hidden on page load */
+        align-items: center;
+        justify-content: center;
+      }
+
+      #successModal .modal-content {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 90%;
+        width: 320px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+
+      #successModal button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border: none;
+        background-color: #005eb8;
+        color: white;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
   <body>
     <header class="topbar">
-      <img src="./Assets/logo.png" class="logo" />
-      <div class="brand">Prince Georges University Hospital</div>
-      <div class="meta" id="metaArea"></div>
+      <img src="./Assets/SelfCheckIn.png" class="topbarimg" />
     </header>
 
-    <main class="container">
-      <section id="checkinPanel" class="panel">
-        <h2>Patient Self Check-In</h2>
+    <div class="container">
+      <p id="welcomeText">Please fill in the check-in form below.</p>
 
-        <div id="authArea" class="auth-area">
-          <p id="welcomeText">Sign in with Roblox to start check-in.</p>
-          <button id="loginRobloxBtn">Sign in with Roblox</button>
-          <button id="logoutBtn" style="display: none">Sign out</button>
+      <form id="checkinForm" class="form">
+        <label>
+          Roblox Username (Required)
+          <input type="text" id="patientRobloxName" />
+        </label>
+
+        <label>
+          Date of Birth (Required)
+          <input type="date" id="patientDOB" required />
+        </label>
+
+        <label>
+          Presenting Complaint (Required)
+          <input type="text" id="patientComplaint" required />
+        </label>
+
+        <div class="form-actions">
+          <button id="createPatientBtn" type="button">Check in</button>
+          <button id="cancelBtn" type="button">Cancel</button>
         </div>
+      </form>
+    </div>
 
-        <form id="checkinForm" class="form hidden">
-          <label>
-            Roblox Username
-            <input type="text" id="patientRobloxName" readonly />
-          </label>
-
-          <label>
-            Date of Birth
-            <input type="date" id="patientDOB" required />
-          </label>
-
-          <label>
-            Presenting Complaint
-            <input type="text" id="patientComplaint" required />
-          </label>
-
-          <div class="form-actions">
-            <button id="createPatientBtn" type="button">Check in</button>
-            <button id="cancelBtn" type="button">Cancel</button>
-          </div>
-        </form>
-
-        <div id="afterCheckin" class="hidden">
-          <h3>Check-in successful</h3>
-          <p>
-            Your generated Patient ID: <strong id="generatedPatientId"></strong>
-          </p>
-          <p>Staff will set Nil-by-Mouth and Priority after triage.</p>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      Copyright 2025 © Prince George University Hospital — Roleplay only.
-    </footer>
+    <!-- Modal -->
+    <div id="successModal">
+      <div class="modal-content">
+        <p>Patient ID generated: <span id="generatedPatientId"></span></p>
+        <button id="checkinAnotherBtn">Check in new patient</button>
+      </div>
+    </div>
 
     <script>
-      // --------- CONFIG ----------
-      // Set this to the redirect URI you register in Roblox Creator Hub (must match exactly)
-      const REDIRECT_URI = window.location.origin + window.location.pathname; // current page
-      // Your Roblox OAuth client_id (public) — set via server or allowed to appear here (client secret must NOT)
-      const CLIENT_ID = "YOUR_ROBLOX_CLIENT_ID"; // <-- replace with your client id
-
-      // Scopes: openid & profile give user info via userinfo endpoint
-      const OAUTH_SCOPES = "openid profile";
-
-      // ----------------------------
-
-      const loginBtn = document.getElementById("loginRobloxBtn");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const welcomeText = document.getElementById("welcomeText");
       const checkinForm = document.getElementById("checkinForm");
-      const authArea = document.getElementById("authArea");
-      const afterCheckin = document.getElementById("afterCheckin");
+      const successModal = document.getElementById("successModal");
+      const generatedPatientIdSpan =
+        document.getElementById("generatedPatientId");
 
-      function buildAuthUrl() {
-        const params = new URLSearchParams({
-          client_id: CLIENT_ID,
-          response_type: "code",
-          redirect_uri: REDIRECT_URI,
-          scope: OAUTH_SCOPES,
-          // state could be added for CSRF protection — consider adding a server-generated state
-        });
-        // Roblox advice: use their authorize endpoint; your server will later exchange the "code".
-        // The exact authorize base is taken from Roblox docs: fetch their OIDC config, etc.
-        // We redirect to Roblox's authorization endpoint.
-        return `https://apis.roblox.com/oauth/v1/authorize?${params.toString()}`;
-      }
-
-      loginBtn.addEventListener("click", () => {
-        // Redirect to Roblox authorization page
-        window.location.href = buildAuthUrl();
-      });
-
-      logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("roblox_user");
-        location.href = REDIRECT_URI; // reload clearing query params
-      });
-
-      // Utility: generate random 6-digit numeric string
       function generatePatientId() {
-        const num = Math.floor(Math.random() * 1_000_000);
-        return String(num).padStart(6, "0");
+        return Math.floor(100000 + Math.random() * 900000).toString();
       }
 
-      // Show user UI
-      function showSignedInUI(user) {
-        welcomeText.textContent = `Signed in as ${user.username}`;
-        document.getElementById("patientRobloxName").value = user.username;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-        checkinForm.classList.remove("hidden");
-        afterCheckin.classList.add("hidden");
-      }
+      // Ensure modal is hidden on page load
+      successModal.style.display = "none";
 
-      function showSignedOutUI() {
-        welcomeText.textContent = "Sign in with Roblox to start check-in.";
-        document.getElementById("patientRobloxName").value = "";
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-        checkinForm.classList.add("hidden");
-        afterCheckin.classList.add("hidden");
-      }
-
-      // On page load: detect OAuth callback ?code=...
-      async function handleOAuthCallback() {
-        const url = new URL(window.location.href);
-        const code = url.searchParams.get("code");
-        if (!code) {
-          // no code - use any stored user
-          const stored = localStorage.getItem("roblox_user");
-          if (stored) {
-            try {
-              const user = JSON.parse(stored);
-              showSignedInUI(user);
-            } catch {
-              showSignedOutUI();
-            }
-          } else {
-            showSignedOutUI();
-          }
-          return;
-        }
-
-        // We have a code: exchange it server-side via your Netlify function.
-        try {
-          // POST code to serverless function that exchanges code for tokens and returns user info
-          const res = await fetch("/.netlify/functions/exchangeRobloxCode", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
-          });
-
-          if (!res.ok) {
-            const txt = await res.text();
-            throw new Error(txt || "Failed to exchange code");
-          }
-
-          const payload = await res.json();
-          // Expect payload like { username: 'FooBar', id: '12345', ... }
-          const user = {
-            username:
-              payload.username ||
-              payload.preferred_username ||
-              payload.name ||
-              payload.displayName ||
-              "Unknown",
-            id: payload.sub || payload.user_id || payload.id || null,
-            raw: payload,
-          };
-
-          localStorage.setItem("roblox_user", JSON.stringify(user));
-
-          // Remove code param from URL (clean up)
-          url.searchParams.delete("code");
-          history.replaceState({}, document.title, url.toString());
-
-          showSignedInUI(user);
-        } catch (err) {
-          console.error("OAuth exchange error:", err);
-          alert("Sign in failed: " + (err.message || err));
-          showSignedOutUI();
-        }
-      }
-
-      // Create patient handler
       document
         .getElementById("createPatientBtn")
         .addEventListener("click", async () => {
-          const stored = localStorage.getItem("roblox_user");
-          if (!stored) {
-            alert("Please sign in with Roblox first.");
-            return;
-          }
-          const user = JSON.parse(stored);
+          const robloxName = document
+            .getElementById("patientRobloxName")
+            .value.trim();
           const dob = document.getElementById("patientDOB").value;
           const complaint = document
             .getElementById("patientComplaint")
             .value.trim();
 
-          if (!dob || !complaint) {
-            alert("Please fill in Date of Birth and Presenting Complaint.");
+          if (!robloxName || !dob || !complaint) {
+            alert("Please fill in all required fields.");
             return;
           }
 
-          // Generate 6-digit patient id
           const patientId = generatePatientId();
 
-          // Build patient payload - omit nilByMouth & priority
           const payload = {
-            robloxName: user.username,
+            robloxName,
             dateOfBirth: dob,
-            patientId: patientId,
+            patientId,
             presentingComplaint: complaint,
           };
 
           try {
-            // Call your existing createPatient serverless function
-            const token = localStorage.getItem("token"); // optional if your createPatient uses auth
             const res = await fetch("/.netlify/functions/createPatient", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
               body: JSON.stringify(payload),
             });
@@ -242,31 +134,32 @@
               throw new Error(txt || "Failed to create patient");
             }
 
-            const data = await res.json();
-
-            // Show confirmation and patient id
-            document.getElementById("generatedPatientId").textContent =
-              patientId;
-            afterCheckin.classList.remove("hidden");
-            checkinForm.classList.add("hidden");
-
-            // optionally clear inputs
-            document.getElementById("patientDOB").value = "";
-            document.getElementById("patientComplaint").value = "";
+            generatedPatientIdSpan.textContent = patientId;
+            // Show modal only on success
+            successModal.style.display = "flex";
           } catch (err) {
             console.error("Create patient error:", err);
             alert("Could not create patient: " + (err.message || err));
           }
         });
 
-      document.getElementById("cancelBtn").addEventListener("click", () => {
-        // clear and sign out (optional)
-        localStorage.removeItem("roblox_user");
-        showSignedOutUI();
-      });
+      document
+        .getElementById("checkinAnotherBtn")
+        .addEventListener("click", () => {
+          // Hide modal
+          successModal.style.display = "none";
+          // Reset inputs
+          document.getElementById("patientRobloxName").value = "";
+          document.getElementById("patientDOB").value = "";
+          document.getElementById("patientComplaint").value = "";
+        });
 
-      // Run on start
-      handleOAuthCallback();
+      document.getElementById("cancelBtn").addEventListener("click", () => {
+        // Reset inputs but keep form visible
+        document.getElementById("patientRobloxName").value = "";
+        document.getElementById("patientDOB").value = "";
+        document.getElementById("patientComplaint").value = "";
+      });
     </script>
   </body>
 </html>
