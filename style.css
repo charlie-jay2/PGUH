@@ -27,7 +27,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .brand {
-  font-weight: 700;
+  font-weight: 600;
+  position: fixed;
+  top: 5%;
+  left: 50%;
+  color: var(--panel);
+  transform: translate(-50%, -50%);
 }
 .container {
   max-width: var(--max-width);
@@ -640,4 +645,8 @@ footer.footer {
 .topbarimg {
   width: 100%;
   height: auto;
+}
+
+.topbar {
+  background-color: var(--nhs-blue);
 }
