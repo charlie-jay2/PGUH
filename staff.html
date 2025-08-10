@@ -110,6 +110,24 @@
           </form>
         </section>
 
+        <!-- MOVED Shifts Section HERE -->
+        <section class="panel shifts" style="margin-top: 40px">
+          <h2>Shifts Management</h2>
+
+          <table id="shiftsTable" class="table">
+            <thead>
+              <tr>
+                <th>Staff Name</th>
+                <th>Role</th>
+                <th>Shift Start</th>
+                <th>Shift End</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="shiftsBody"></tbody>
+          </table>
+        </section>
+
         <section class="panel patients">
           <h2>Patients</h2>
 
@@ -145,7 +163,6 @@
               <input type="text" id="patientComplaint" required />
             </label>
 
-            <!-- Keep existing Priority dropdown with NHS styling -->
             <label>
               Priority
               <select id="patientPriority" class="priority-select" required>
@@ -195,6 +212,8 @@
     <script src="app.js"></script>
 
     <script>
+      const apiBase = "/.netlify/functions";
+
       document.addEventListener("DOMContentLoaded", function () {
         setInterval(async () => {
           const token = localStorage.getItem("token");
@@ -202,6 +221,7 @@
           try {
             await loadHospital();
             await loadPatients();
+            await loadShifts();
             console.log("Data refreshed:", new Date().toLocaleTimeString());
           } catch (err) {
             console.error("Auto-refresh error:", err);
@@ -271,7 +291,6 @@
               alert("Patient created successfully!");
               document.getElementById("patientForm").reset();
 
-              // Reload patients list - assuming you have a function for that
               if (typeof loadPatients === "function") {
                 await loadPatients();
               }
@@ -279,6 +298,130 @@
               alert("Error creating patient: " + err.message);
             }
           });
+
+        // Load shifts
+        async function loadShifts() {
+          const token = localStorage.getItem("token");
+          if (!token) return;
+
+          try {
+            const res = await fetch("/.netlify/functions/getShifts", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            if (!res.ok) throw new Error("Failed to load shifts");
+
+            const data = await res.json();
+            populateShifts(data.shifts);
+          } catch (err) {
+            console.error("Load shifts error:", err);
+          }
+        }
+
+        // Populate shifts table
+        function populateShifts(shifts) {
+          const tbody = document.getElementById("shiftsBody");
+          tbody.innerHTML = "";
+          shifts.forEach((shift) => {
+            const tr = document.createElement("tr");
+            tr.dataset.shiftId = shift._id;
+            tr.dataset.shiftStart = shift.shiftStart;
+            tr.dataset.shiftEnd = shift.shiftEnd;
+
+            tr.innerHTML = `
+              <td>${escapeHtml(shift.staffName)}</td>
+              <td>${escapeHtml(shift.role)}</td>
+              <td>${formatDateTime(shift.shiftStart)}</td>
+              <td>${formatDateTime(shift.shiftEnd)}</td>
+              <td class="shift-status">Loading...</td>
+            `;
+
+            tbody.appendChild(tr);
+          });
+          updateShiftStatuses();
+        }
+
+        // Date format helper
+        function formatDateTime(dateStr) {
+          const d = new Date(dateStr);
+          if (isNaN(d)) return "";
+          return d.toLocaleString(undefined, {
+            dateStyle: "short",
+            timeStyle: "short",
+          });
+        }
+
+        // Escape HTML for security
+        function escapeHtml(text) {
+          if (!text) return "";
+          return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+
+        // Delete shift function (called from inline button)
+        window.deleteShift = async function (shiftId) {
+          if (!confirm("Are you sure you want to delete this shift?")) return;
+
+          const token = localStorage.getItem("token");
+          if (!token) {
+            alert("Please log in first");
+            return;
+          }
+
+          try {
+            const res = await fetch("/.netlify/functions/deleteShift", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ shiftId }),
+            });
+
+            if (!res.ok) throw new Error("Failed to delete shift");
+
+            alert("Shift deleted.");
+            await loadShifts();
+          } catch (err) {
+            alert("Error deleting shift: " + err.message);
+          }
+        };
+
+        // Update shift statuses every minute
+        function updateShiftStatuses() {
+          const now = new Date();
+          const rows = document.querySelectorAll("#shiftsBody tr");
+
+          rows.forEach((row) => {
+            const shiftStart = new Date(row.dataset.shiftStart);
+            const shiftEnd = new Date(row.dataset.shiftEnd);
+            const statusCell = row.querySelector(".shift-status");
+
+            const diffToStart = (shiftStart - now) / (1000 * 60); // in minutes
+            const diffToEnd = (shiftEnd - now) / (1000 * 60);
+
+            if (diffToStart <= 10 && diffToStart > 0) {
+              statusCell.textContent = "Shift Starting Soon";
+            } else if (diffToStart <= 0 && diffToEnd > 0) {
+              statusCell.textContent = "Shift Started";
+            } else if (diffToEnd <= 0) {
+              statusCell.textContent = "Shift Ended";
+            } else {
+              statusCell.textContent = "Upcoming";
+            }
+          });
+        }
+
+        // Start periodic status update
+        setInterval(updateShiftStatuses, 60000);
+
+        // Call initial load
+        loadShifts();
       });
     </script>
   </body>
