@@ -650,3 +650,28 @@ footer.footer {
 .topbar {
   background-color: var(--nhs-blue);
 }
+
+.topnav {
+  display: flex;
+  gap: 20px;
+  margin-left: auto; /* Push nav to right */
+  font-weight: 600;
+  font-family: "Frutiger", Arial, sans-serif;
+}
+
+.topnav a {
+  color: var(--panel);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 1rem;
+}
+
+.topnav a:hover,
+.topnav a:focus {
+  background-color: var(--accent);
+  color: var(--panel);
+  outline: none;
+  box-shadow: 0 0 6px var(--accent);
+}
