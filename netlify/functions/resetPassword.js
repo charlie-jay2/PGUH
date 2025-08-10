@@ -4,7 +4,9 @@ const sendEmail = require("./sendEmail").sendEmail; // your email function
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME;
-const baseUrl = process.env.BASE_URL || "http://localhost:8888/"; // fallback
+const baseUrl =
+  process.env.BASE_URL ||
+  "https://princegeorgesuniversityhospital.netlify.app/";
 
 let client;
 
@@ -22,7 +24,8 @@ exports.handler = async function (event) {
   }
 
   try {
-    const { username } = JSON.parse(event.body);
+    const data = JSON.parse(event.body);
+    const { username } = data;
 
     if (!username) {
       return {
@@ -33,6 +36,7 @@ exports.handler = async function (event) {
 
     const db = await getDb();
     const users = db.collection("staff");
+    const passwordResets = db.collection("passwordResets");
 
     // Find user by username (case-insensitive)
     const user = await users.findOne({
@@ -53,15 +57,19 @@ exports.handler = async function (event) {
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
 
-    // Save token and expiry in user document
-    await users.updateOne(
-      { _id: user._id },
+    // Save token info in passwordResets collection
+    // Upsert so multiple resets won't duplicate
+    await passwordResets.updateOne(
+      { username: user.username },
       {
         $set: {
-          resetPasswordToken: resetToken,
-          resetPasswordExpires: resetExpires,
+          token: resetToken,
+          username: user.username,
+          email: user.email,
+          expires: resetExpires,
         },
-      }
+      },
+      { upsert: true }
     );
 
     // Construct reset link with full URL
