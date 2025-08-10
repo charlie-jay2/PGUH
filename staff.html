@@ -33,6 +33,47 @@
       name="twitter:image"
       content="https://princegeorgesuniversityhospital.netlify.app/Assets/logo.png"
     />
+    <style>
+      /* Basic modal styles */
+      #forgotPasswordModal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      #forgotPasswordModal .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 300px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      #forgotPasswordModal .modal-content h3 {
+        margin-top: 0;
+      }
+      #forgotPasswordModal label {
+        display: block;
+        margin-bottom: 8px;
+      }
+      #forgotPasswordModal input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 12px;
+        box-sizing: border-box;
+      }
+      #forgotPasswordModal .modal-actions {
+        text-align: right;
+      }
+      #forgotPasswordModal button {
+        margin-left: 8px;
+      }
+    </style>
   </head>
 
   <body>
@@ -48,23 +89,55 @@
     <main class="container" id="mainContainer">
       <section id="loginPanel" class="panel login-panel">
         <h2>Staff Login</h2>
-        <form id="loginForm" class="form">
-          <label
-            >Username
+        <form id="loginForm" class="form" onsubmit="return false;">
+          <label>
+            Username
             <input type="text" id="loginUsername" required />
           </label>
-          <label
-            >Password
+          <label>
+            Password
             <input type="password" id="loginPassword" required />
           </label>
-          <div class="form-actions">
+          <div
+            class="form-actions"
+            style="display: flex; align-items: center; gap: 10px"
+          >
             <button id="loginBtn" type="button">Log in</button>
+            <button
+              id="forgotPasswordBtn"
+              type="button"
+              style="
+                background: none;
+                border: none;
+                color: var(--nhs-blue);
+                cursor: pointer;
+                text-decoration: underline;
+                padding: 0;
+              "
+            >
+              Forgot Password?
+            </button>
           </div>
         </form>
       </section>
 
+      <!-- Forgot Password Modal -->
+      <div id="forgotPasswordModal">
+        <div class="modal-content">
+          <h3>Reset Password</h3>
+          <p>Enter your username to receive a password reset email.</p>
+          <label for="resetUsername">Username</label>
+          <input type="text" id="resetUsername" autocomplete="username" />
+          <div class="modal-actions">
+            <button id="cancelResetBtn" type="button">Cancel</button>
+            <button id="sendResetBtn" type="button">Send Reset Email</button>
+          </div>
+        </div>
+      </div>
+
       <!-- DASHBOARD (hidden until logged in) -->
       <section id="dashboard" class="hidden">
+        <!-- ... your existing dashboard code ... -->
         <section class="panel hospital-overview">
           <h2>Hospital Overview</h2>
           <div class="stats">
@@ -91,16 +164,16 @@
           </div>
 
           <form id="hospitalForm" class="hidden form">
-            <label
-              >Wait time (mins)
+            <label>
+              Wait time (mins)
               <input type="number" id="inputWaitTime" min="0" />
             </label>
-            <label
-              >Beds available
+            <label>
+              Beds available
               <input type="number" id="inputBedsAvailable" min="0" />
             </label>
-            <label
-              >Total beds
+            <label>
+              Total beds
               <input type="number" id="inputTotalBeds" min="0" />
             </label>
             <div class="form-actions">
@@ -215,6 +288,65 @@
       const apiBase = "/.netlify/functions";
 
       document.addEventListener("DOMContentLoaded", function () {
+        // Forgot Password modal elements
+        const forgotPasswordModal = document.getElementById(
+          "forgotPasswordModal"
+        );
+        const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+        const cancelResetBtn = document.getElementById("cancelResetBtn");
+        const sendResetBtn = document.getElementById("sendResetBtn");
+        const resetUsernameInput = document.getElementById("resetUsername");
+
+        // Show modal on Forgot Password click
+        forgotPasswordBtn.addEventListener("click", () => {
+          resetUsernameInput.value = "";
+          forgotPasswordModal.style.display = "block";
+          resetUsernameInput.focus();
+        });
+
+        // Cancel button hides modal
+        cancelResetBtn.addEventListener("click", () => {
+          forgotPasswordModal.style.display = "none";
+        });
+
+        // Clicking outside modal closes it
+        window.addEventListener("click", (e) => {
+          if (e.target === forgotPasswordModal) {
+            forgotPasswordModal.style.display = "none";
+          }
+        });
+
+        // Send password reset request
+        sendResetBtn.addEventListener("click", async () => {
+          const username = resetUsernameInput.value.trim();
+          if (!username) {
+            alert("Please enter your username.");
+            resetUsernameInput.focus();
+            return;
+          }
+
+          try {
+            const res = await fetch(`${apiBase}/requestPasswordReset`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username }),
+            });
+
+            if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(errorText || "Failed to send reset email");
+            }
+
+            alert(
+              "If that username exists, a password reset email has been sent. Please check your inbox."
+            );
+            forgotPasswordModal.style.display = "none";
+          } catch (err) {
+            alert("Error: " + err.message);
+          }
+        });
+
+        // Your existing interval and loadShifts etc.
         setInterval(async () => {
           const token = localStorage.getItem("token");
           if (!token) return;

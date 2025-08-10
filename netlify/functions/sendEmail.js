@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-exports.sendEmail = async (to, username, password = "", type = "account") => {
+exports.sendEmail = async (to, username, content = "", type = "account") => {
   // Gmail transport
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -21,7 +21,7 @@ exports.sendEmail = async (to, username, password = "", type = "account") => {
       <p>Here are your account details:</p>
       <div class="details">
         <p><strong>Username:</strong> ${username}</p>
-        <p><strong>Password:</strong> ${password}</p>
+        <p><strong>Password:</strong> ${content}</p>
       </div>`;
   } else if (type === "reset") {
     subject = "Your NHS Staff Password Has Been Reset";
@@ -30,7 +30,7 @@ exports.sendEmail = async (to, username, password = "", type = "account") => {
       <p>Your password has been changed successfully.</p>
       <div class="details">
         <p><strong>Username:</strong> ${username}</p>
-        <p><strong>New Password:</strong> ${password}</p>
+        <p><strong>New Password:</strong> ${content}</p>
       </div>`;
   } else if (type === "deleted") {
     subject = "Your NHS Staff Account Has Been Deleted";
@@ -38,6 +38,16 @@ exports.sendEmail = async (to, username, password = "", type = "account") => {
     detailsHtml = `
       <p>This is to inform you that your NHS Staff account with username <strong>${username}</strong> has been removed from the system.</p>
       <p>If you think this was a mistake, please contact your administrator immediately.</p>`;
+  } else if (type === "reset-link") {
+    subject = "Password Reset Request";
+    intro = `
+      <p>Hello ${username},</p>
+      <p>You requested a password reset for your NHS Staff account.</p>
+      <p>Click the link below to reset your password (valid for 1 hour):</p>
+      <p><a href="${content}">${content}</a></p>
+      <p>If you did not request this, please ignore this email.</p>
+    `;
+    detailsHtml = ""; // No extra details for this type
   }
 
   const htmlMessage = `
