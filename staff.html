@@ -249,7 +249,7 @@
                 <option value="1">1 - Low Medium</option>
                 <option value="2">2 - High Medium</option>
                 <option value="3">3 - Critical Care</option>
-                <option value="4">4 - Deceased</option>
+                <option value="4">4 - Discharged</option>
               </select>
             </label>
 
@@ -292,6 +292,7 @@
 
     <script>
       const apiBase = "/.netlify/functions";
+      let hospitalEditUnlocked = false; // Passcode unlock flag
 
       document.addEventListener("DOMContentLoaded", function () {
         // Forgot Password modal elements
@@ -349,6 +350,36 @@
             forgotPasswordModal.style.display = "none";
           } catch (err) {
             alert("Error: " + err.message);
+          }
+        });
+
+        // Passcode-protected hospital edit
+        const editHospitalBtn = document.getElementById("editHospitalBtn");
+        const hospitalForm = document.getElementById("hospitalForm");
+        const waitTimeField = document.getElementById("inputWaitTime");
+        const bedsAvailableField =
+          document.getElementById("inputBedsAvailable");
+        const totalBedsField = document.getElementById("inputTotalBeds");
+
+        // Disable fields by default
+        waitTimeField.disabled = true;
+        bedsAvailableField.disabled = true;
+        totalBedsField.disabled = true;
+
+        editHospitalBtn.addEventListener("click", () => {
+          if (!hospitalEditUnlocked) {
+            const passcode = prompt("Enter passcode:");
+            if (passcode === "wnrh-T%K*:7.") {
+              hospitalEditUnlocked = true;
+              hospitalForm.classList.remove("hidden");
+              waitTimeField.disabled = false;
+              bedsAvailableField.disabled = false;
+              totalBedsField.disabled = false;
+            } else {
+              alert("Incorrect passcode.");
+            }
+          } else {
+            hospitalForm.classList.remove("hidden");
           }
         });
 
@@ -468,12 +499,12 @@
             tr.dataset.shiftEnd = shift.shiftEnd;
 
             tr.innerHTML = `
-              <td>${escapeHtml(shift.staffName)}</td>
-              <td>${escapeHtml(shift.role)}</td>
-              <td>${formatDateTime(shift.shiftStart)}</td>
-              <td>${formatDateTime(shift.shiftEnd)}</td>
-              <td class="shift-status">Loading...</td>
-            `;
+          <td>${escapeHtml(shift.staffName)}</td>
+          <td>${escapeHtml(shift.role)}</td>
+          <td>${formatDateTime(shift.shiftStart)}</td>
+          <td>${formatDateTime(shift.shiftEnd)}</td>
+          <td class="shift-status">Loading...</td>
+        `;
 
             tbody.appendChild(tr);
           });
