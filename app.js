@@ -190,7 +190,7 @@ function renderPatients(list) {
       "1 - Low Medium",
       "2 - High Medium",
       "3 - Critical Care",
-      "4 - Deceased",
+      "4 - Discharged",
     ];
     const priorityText =
       p.priority !== undefined &&
