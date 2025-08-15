@@ -17,10 +17,10 @@ function el(id) {
   return document.getElementById(id);
 }
 function show(elm) {
-  elm.classList.remove("hidden");
+  if (elm) elm.classList.remove("hidden");
 }
 function hide(elm) {
-  elm.classList.add("hidden");
+  if (elm) elm.classList.add("hidden");
 }
 
 function getAuthToken() {
@@ -62,23 +62,26 @@ const loginPanel = el("loginPanel");
 const dashboard = el("dashboard");
 const metaArea = el("metaArea");
 
-el("loginBtn").addEventListener("click", async () => {
-  const u = el("loginUsername").value.trim();
-  const p = el("loginPassword").value;
-  if (!u || !p) return alert("username & password required");
-  try {
-    const res = await fetchJson(API.login, {
-      method: "POST",
-      body: JSON.stringify({ username: u, password: p }),
-    });
-    setAuthToken(res.token);
-    setUsername(res.username);
-    el("loginPassword").value = "";
-    await onLogin();
-  } catch (e) {
-    alert("Login failed: " + e.message);
-  }
-});
+const loginBtn = el("loginBtn");
+if (loginBtn) {
+  loginBtn.addEventListener("click", async () => {
+    const u = el("loginUsername")?.value.trim();
+    const p = el("loginPassword")?.value;
+    if (!u || !p) return alert("username & password required");
+    try {
+      const res = await fetchJson(API.login, {
+        method: "POST",
+        body: JSON.stringify({ username: u, password: p }),
+      });
+      setAuthToken(res.token);
+      setUsername(res.username);
+      if (el("loginPassword")) el("loginPassword").value = "";
+      await onLogin();
+    } catch (e) {
+      alert("Login failed: " + e.message);
+    }
+  });
+}
 
 function logout() {
   setAuthToken(null);
@@ -88,23 +91,27 @@ function logout() {
 
 function renderLoggedIn() {
   const name = getUsername() || "Staff";
-  metaArea.innerHTML = `<div>Signed in as <strong>${escapeHtml(
-    name
-  )}</strong></div>
-    <div><button id="logoutBtn" class="secondary">Log out</button></div>`;
-  document.getElementById("logoutBtn").addEventListener("click", logout);
+  if (metaArea) {
+    metaArea.innerHTML = `<div>Signed in as <strong>${escapeHtml(
+      name
+    )}</strong></div>
+      <div><button id="logoutBtn" class="secondary">Log out</button></div>`;
+    const logoutBtn = el("logoutBtn");
+    if (logoutBtn) logoutBtn.addEventListener("click", logout);
+  }
   hide(loginPanel);
   show(dashboard);
 }
 
 function renderLoggedOut() {
-  metaArea.innerHTML = "";
+  if (metaArea) metaArea.innerHTML = "";
   show(loginPanel);
   hide(dashboard);
 }
 
 /* ---------- Styling helper for waitTime and bedsAvailable ---------- */
 function updateColor(element, value, type) {
+  if (!element) return;
   element.classList.remove("red", "yellow", "green");
   if (value === null || isNaN(value)) return;
 
@@ -126,65 +133,75 @@ async function loadHospital() {
   const waitTimeVal = h.waitTime != null ? h.waitTime : null;
   const bedsAvailableVal = h.bedsAvailable != null ? h.bedsAvailable : null;
 
-  el("waitTime").innerText = waitTimeVal != null ? `${waitTimeVal} min` : "—";
-  el("bedsAvailable").innerText =
-    bedsAvailableVal != null ? bedsAvailableVal : "—";
-  el("totalBeds").innerText = h.totalBeds != null ? h.totalBeds : "—";
-  el("lastUpdated").innerText = h.updatedAt
-    ? new Date(h.updatedAt).toLocaleString()
-    : "—";
-  el("inputWaitTime").value = waitTimeVal ?? "";
-  el("inputBedsAvailable").value = bedsAvailableVal ?? "";
-  el("inputTotalBeds").value = h.totalBeds ?? "";
+  if (el("waitTime"))
+    el("waitTime").innerText = waitTimeVal != null ? `${waitTimeVal} min` : "—";
+  if (el("bedsAvailable"))
+    el("bedsAvailable").innerText =
+      bedsAvailableVal != null ? bedsAvailableVal : "—";
+  if (el("totalBeds"))
+    el("totalBeds").innerText = h.totalBeds != null ? h.totalBeds : "—";
+  if (el("lastUpdated"))
+    el("lastUpdated").innerText = h.updatedAt
+      ? new Date(h.updatedAt).toLocaleString()
+      : "—";
+  if (el("inputWaitTime")) el("inputWaitTime").value = waitTimeVal ?? "";
+  if (el("inputBedsAvailable"))
+    el("inputBedsAvailable").value = bedsAvailableVal ?? "";
+  if (el("inputTotalBeds")) el("inputTotalBeds").value = h.totalBeds ?? "";
 
-  // Remove " min" before passing to color helper:
   updateColor(el("waitTime"), waitTimeVal, "waitTime");
   updateColor(el("bedsAvailable"), bedsAvailableVal, "beds");
 }
 
-el("editHospitalBtn").addEventListener("click", () => show(el("hospitalForm")));
-el("cancelHospitalBtn").addEventListener("click", () =>
-  hide(el("hospitalForm"))
-);
-el("saveHospitalBtn").addEventListener("click", async () => {
-  const payload = {
-    waitTime: Number(el("inputWaitTime").value || 0),
-    bedsAvailable: Number(el("inputBedsAvailable").value || 0),
-    totalBeds: Number(el("inputTotalBeds").value || 0),
-  };
-  try {
-    await fetchJson(API.updateHospital, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    hide(el("hospitalForm"));
-    await loadHospital();
-  } catch (e) {
-    alert("Failed to save hospital data: " + e.message);
-  }
-});
+const editHospitalBtn = el("editHospitalBtn");
+if (editHospitalBtn)
+  editHospitalBtn.addEventListener("click", () => show(el("hospitalForm")));
+
+const cancelHospitalBtn = el("cancelHospitalBtn");
+if (cancelHospitalBtn)
+  cancelHospitalBtn.addEventListener("click", () => hide(el("hospitalForm")));
+
+const saveHospitalBtn = el("saveHospitalBtn");
+if (saveHospitalBtn)
+  saveHospitalBtn.addEventListener("click", async () => {
+    const payload = {
+      waitTime: Number(el("inputWaitTime")?.value || 0),
+      bedsAvailable: Number(el("inputBedsAvailable")?.value || 0),
+      totalBeds: Number(el("inputTotalBeds")?.value || 0),
+    };
+    try {
+      await fetchJson(API.updateHospital, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      hide(el("hospitalForm"));
+      await loadHospital();
+    } catch (e) {
+      alert("Failed to save hospital data: " + e.message);
+    }
+  });
 
 /* ---------- Patients ---------- */
 let patientsCache = [];
 async function loadPatients() {
   const res = await fetchJson(API.getPatients);
-  patientsCache = res.patients || [];
+  patientsCache = res?.patients || [];
   renderPatients(patientsCache);
 }
 
 function renderPatients(list) {
   const body = el("patientsBody");
+  if (!body) return;
   body.innerHTML = "";
   list.forEach((p) => {
-    // Calculate age from dateOfBirth
     let age = "";
     if (p.dateOfBirth) {
       const dob = new Date(p.dateOfBirth);
-      const diff = Date.now() - dob.getTime();
-      age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+      age = Math.floor(
+        (Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+      );
     }
 
-    // Priority label mapping
     const priorityLabels = [
       "0 - Minor Care",
       "1 - Low Medium",
@@ -220,25 +237,27 @@ function renderPatients(list) {
   });
 
   document.querySelectorAll(".edit").forEach((btn) => {
-    btn.onclick = (ev) => {
-      const id = ev.target.getAttribute("data-id");
-      openPatientForm("edit", id);
-    };
+    if (btn)
+      btn.onclick = (ev) => {
+        const id = ev.target.getAttribute("data-id");
+        openPatientForm("edit", id);
+      };
   });
   document.querySelectorAll(".del").forEach((btn) => {
-    btn.onclick = async (ev) => {
-      const id = ev.target.getAttribute("data-id");
-      if (!confirm("Delete patient?")) return;
-      try {
-        await fetchJson(API.deletePatient, {
-          method: "POST",
-          body: JSON.stringify({ id }),
-        });
-        await loadPatients();
-      } catch (e) {
-        alert("Failed to delete: " + e.message);
-      }
-    };
+    if (btn)
+      btn.onclick = async (ev) => {
+        const id = ev.target.getAttribute("data-id");
+        if (!confirm("Delete patient?")) return;
+        try {
+          await fetchJson(API.deletePatient, {
+            method: "POST",
+            body: JSON.stringify({ id }),
+          });
+          await loadPatients();
+        } catch (e) {
+          alert("Failed to delete: " + e.message);
+        }
+      };
   });
 }
 
@@ -251,81 +270,57 @@ function escapeHtml(s = "") {
     .replaceAll("'", "&#39;");
 }
 
-el("cancelPatientBtn").addEventListener("click", () => {
-  hide(el("patientForm"));
-});
+const cancelPatientBtn = el("cancelPatientBtn");
+if (cancelPatientBtn)
+  cancelPatientBtn.addEventListener("click", () => hide(el("patientForm")));
 
-function openPatientForm(mode, id) {
-  show(el("patientForm"));
-  el("patientFormTitle").innerText =
-    mode === "new" ? "Add patient" : "Edit patient";
+const savePatientBtn = el("savePatientBtn");
+if (savePatientBtn)
+  savePatientBtn.addEventListener("click", async () => {
+    const mode = savePatientBtn.dataset.mode || "new";
+    const priorityValue = parseInt(el("patientPriority")?.value, 10) || 0;
 
-  if (mode === "new") {
-    el("patientRobloxName").value = "";
-    el("patientDOB").value = "";
-    el("patientId").value = "";
-    el("patientNilByMouth").value = "";
-    el("patientComplaint").value = "";
-    el("patientPriority").value = "0"; // default priority
-    el("savePatientBtn").dataset.mode = "new";
-    delete el("savePatientBtn").dataset.id;
-  } else {
-    const p = patientsCache.find((x) => x._id === id);
-    if (!p) return alert("Patient not found");
-    el("patientRobloxName").value = p.robloxName || "";
-    el("patientDOB").value = p.dateOfBirth ? p.dateOfBirth.split("T")[0] : "";
-    el("patientId").value = p.patientId || "";
-    el("patientNilByMouth").value = p.nilByMouth || "";
-    el("patientComplaint").value = p.presentingComplaint || "";
-    el("patientPriority").value = (p.priority ?? 0).toString();
-    el("savePatientBtn").dataset.mode = "edit";
-    el("savePatientBtn").dataset.id = id;
-  }
-}
-
-el("savePatientBtn").addEventListener("click", async () => {
-  const mode = el("savePatientBtn").dataset.mode || "new";
-  const priorityValue = parseInt(el("patientPriority").value, 10) || 0;
-
-  const payload = {
-    robloxName: el("patientRobloxName").value.trim(),
-    dateOfBirth: el("patientDOB").value,
-    patientId: el("patientId").value.trim(),
-    nilByMouth: el("patientNilByMouth").value,
-    presentingComplaint: el("patientComplaint").value.trim(),
-    priority: priorityValue,
-  };
-  try {
-    if (mode === "new") {
-      await fetchJson(API.createPatient, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-    } else {
-      payload.id = el("savePatientBtn").dataset.id;
-      await fetchJson(API.updatePatient, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+    const payload = {
+      robloxName: el("patientRobloxName")?.value.trim(),
+      dateOfBirth: el("patientDOB")?.value,
+      patientId: el("patientId")?.value.trim(),
+      nilByMouth: el("patientNilByMouth")?.value,
+      presentingComplaint: el("patientComplaint")?.value.trim(),
+      priority: priorityValue,
+    };
+    try {
+      if (mode === "new") {
+        await fetchJson(API.createPatient, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        payload.id = savePatientBtn.dataset.id;
+        await fetchJson(API.updatePatient, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+      hide(el("patientForm"));
+      await loadPatients();
+    } catch (e) {
+      alert("Failed to save patient: " + e.message);
     }
-    hide(el("patientForm"));
-    await loadPatients();
-  } catch (e) {
-    alert("Failed to save patient: " + e.message);
-  }
-});
+  });
 
-el("searchPatient").addEventListener("input", (ev) => {
-  const q = ev.target.value.trim().toLowerCase();
-  if (!q) return renderPatients(patientsCache);
-  const filtered = patientsCache.filter(
-    (p) =>
-      (p.robloxName || "").toLowerCase().includes(q) ||
-      (p.patientId || "").toLowerCase().includes(q) ||
-      (p.presentingComplaint || "").toLowerCase().includes(q)
-  );
-  renderPatients(filtered);
-});
+const searchPatient = el("searchPatient");
+if (searchPatient)
+  searchPatient.addEventListener("input", (ev) => {
+    const q = ev.target.value.trim().toLowerCase();
+    if (!q) return renderPatients(patientsCache);
+    const filtered = patientsCache.filter(
+      (p) =>
+        (p.robloxName || "").toLowerCase().includes(q) ||
+        (p.patientId || "").toLowerCase().includes(q) ||
+        (p.presentingComplaint || "").toLowerCase().includes(q)
+    );
+    renderPatients(filtered);
+  });
 
 /* ---------- Init ---------- */
 async function onLogin() {

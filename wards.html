@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ward Management — NHS Staff Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      #wardSelect,
+      #createBayBtn {
+        padding: 6px 12px;
+      }
+
+      .ward-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .bay {
+        border: 1px solid #000;
+        background-color: #fff;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        /* No border-radius for boxy look */
+      }
+
+      .bay-header {
+        font-weight: bold;
+        padding: 8px;
+        color: #fff;
+      }
+
+      .priority-0 .bay-header {
+        background-color: gray;
+      }
+      .priority-1 .bay-header {
+        background-color: green;
+      }
+      .priority-2 .bay-header {
+        background-color: yellow;
+        color: black;
+      }
+      .priority-3 .bay-header {
+        background-color: red;
+      }
+
+      .bay-content {
+        padding: 8px;
+        color: #000;
+        background-color: #fff;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-content {
+        background: white;
+        padding: 16px;
+        min-width: 300px;
+      }
+      .modal-content label {
+        display: block;
+        margin-top: 8px;
+      }
+      .modal-content input,
+      .modal-content select {
+        width: 100%;
+        margin-top: 4px;
+      }
+      .close {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Ward Management</h1>
+      <label for="wardSelect">Select Ward:</label>
+      <select id="wardSelect">
+        <option value="AAU">AAU</option>
+        <option value="Resus">Resus</option>
+        <option value="Minors">Minors</option>
+        <option value="Majors">Majors</option>
+      </select>
+      <button id="createBayBtn">Create Bay</button>
+    </header>
+
+    <div id="wardGrid" class="ward-grid"></div>
+
+    <!-- Edit Bay Modal -->
+    <div id="bayModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeBayModal">&times;</span>
+        <h2>Edit Bay</h2>
+        <form id="bayForm">
+          <label>Bay Name<input type="text" id="bayName" required /></label>
+          <label>Patient Name<input type="text" id="patientName" /></label>
+          <label>Nurse Name<input type="text" id="nurseName" /></label>
+          <label
+            >Priority
+            <select id="priority">
+              <option value="0">Vacant</option>
+              <option value="1">1 - Low</option>
+              <option value="2">2 - Medium</option>
+              <option value="3">3 - High</option>
+            </select>
+          </label>
+          <button type="submit">Save Bay</button>
+          <button type="button" id="resetBayBtn">Reset Bay</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Create Bay Modal -->
+    <div id="createBayModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeCreateBayModal">&times;</span>
+        <h2>Create New Bay</h2>
+        <form id="createBayForm">
+          <label>Bay Name<input type="text" id="newBayName" required /></label>
+          <label
+            >Priority
+            <select id="newBayPriority">
+              <option value="0">Vacant</option>
+              <option value="1">1 - Low</option>
+              <option value="2">2 - Medium</option>
+              <option value="3">3 - High</option>
+            </select>
+          </label>
+          <button type="submit">Create Bay</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const apiBase = "/.netlify/functions";
+      const wardSelect = document.getElementById("wardSelect");
+      const wardGrid = document.getElementById("wardGrid");
+
+      const bayModal = document.getElementById("bayModal");
+      const closeBayModal = document.getElementById("closeBayModal");
+      const bayForm = document.getElementById("bayForm");
+      const resetBayBtn = document.getElementById("resetBayBtn");
+      let selectedBayId = null;
+
+      const createBayBtn = document.getElementById("createBayBtn");
+      const createBayModal = document.getElementById("createBayModal");
+      const closeCreateBayModal = document.getElementById(
+        "closeCreateBayModal"
+      );
+      const createBayForm = document.getElementById("createBayForm");
+
+      // Load bays
+      async function loadBays() {
+        try {
+          const res = await fetch(
+            `${apiBase}/getBays?ward=${encodeURIComponent(wardSelect.value)}`
+          );
+          if (!res.ok) throw new Error("Failed to load bays");
+          const bays = await res.json();
+          renderBays(bays);
+        } catch (err) {
+          console.error("Failed to load bays:", err);
+        }
+      }
+
+      // Render bays in boxy style
+      function renderBays(bays) {
+        wardGrid.innerHTML = "";
+        bays.forEach((bay) => {
+          const div = document.createElement("div");
+          div.classList.add("bay", `priority-${bay.priority ?? 0}`);
+          div.innerHTML = `
+      <div class="bay-header">${bay.name}</div>
+      <div class="bay-content">
+        <div>Patient: ${bay.patientName || "Vacant"}</div>
+        <div>Nurse: ${bay.nurseName || "-"}</div>
+      </div>`;
+          div.onclick = () => openBayModal(bay);
+          wardGrid.appendChild(div);
+        });
+      }
+
+      // Open edit modal
+      function openBayModal(bay) {
+        selectedBayId = bay._id;
+        document.getElementById("bayName").value = bay.name;
+        document.getElementById("patientName").value = bay.patientName || "";
+        document.getElementById("nurseName").value = bay.nurseName || "";
+        document.getElementById("priority").value = bay.priority ?? 0;
+        bayModal.style.display = "flex";
+      }
+
+      // Close modals
+      closeBayModal.onclick = () => (bayModal.style.display = "none");
+      closeCreateBayModal.onclick = () =>
+        (createBayModal.style.display = "none");
+      createBayBtn.onclick = () => (createBayModal.style.display = "flex");
+
+      // Save bay
+      bayForm.onsubmit = async (e) => {
+        e.preventDefault();
+        await fetch(`${apiBase}/updateBay`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: selectedBayId,
+            ward: wardSelect.value,
+            name: document.getElementById("bayName").value,
+            patientName: document.getElementById("patientName").value,
+            nurseName: document.getElementById("nurseName").value,
+            priority: parseInt(document.getElementById("priority").value),
+          }),
+        });
+        bayModal.style.display = "none";
+        loadBays();
+      };
+
+      // Reset bay
+      resetBayBtn.onclick = async () => {
+        await fetch(`${apiBase}/updateBay`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: selectedBayId,
+            ward: wardSelect.value,
+            name: document.getElementById("bayName").value,
+            patientName: "",
+            nurseName: "",
+            priority: 0,
+          }),
+        });
+        bayModal.style.display = "none";
+        loadBays();
+      };
+
+      // Create new bay
+      createBayForm.onsubmit = async (e) => {
+        e.preventDefault();
+        await fetch(`${apiBase}/createBay`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ward: wardSelect.value,
+            name: document.getElementById("newBayName").value,
+            priority: parseInt(document.getElementById("newBayPriority").value),
+          }),
+        });
+        createBayForm.reset();
+        createBayModal.style.display = "none";
+        loadBays();
+      };
+
+      // Ward change
+      wardSelect.onchange = loadBays;
+
+      // Poll every 5s
+      setInterval(loadBays, 5000);
+
+      loadBays();
+    </script>
+  </body>
+</html>
