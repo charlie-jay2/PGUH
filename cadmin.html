@@ -164,8 +164,16 @@
           <td>${escapeHtml(app.experience)}</td>
           <td style="max-width: 280px; overflow-wrap: break-word;">${scenarioHtml}</td>
           <td>
+            <button onclick="updateApplicationStatus('${app._id}', 'Accepted')"
+              style="background: var(--stat-value-green); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+              Accept
+            </button>
+            <button onclick="updateApplicationStatus('${app._id}', 'Denied')"
+              style="background: var(--stat-value-red); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+              Deny
+            </button>
             <button onclick="deleteApplication('${app._id}')"
-              style="background: var(--stat-value-red); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              style="background: grey; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
               Delete
             </button>
           </td>
@@ -196,6 +204,32 @@
       }
 
       checkAccess();
+    </script>
+    <script>
+      async function updateApplicationStatus(id, status) {
+        if (
+          !confirm(
+            `Are you sure you want to ${status.toLowerCase()} this application?`
+          )
+        )
+          return;
+
+        const res = await fetch(`${apiBase}/updateResponseStatus`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id, status }),
+        });
+
+        if (res.ok) {
+          alert(`Application ${status}.`);
+          checkAccess();
+        } else {
+          alert("Failed to update application status.");
+        }
+      }
     </script>
   </body>
 </html>
