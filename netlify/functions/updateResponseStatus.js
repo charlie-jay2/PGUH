@@ -1,10 +1,8 @@
 const { MongoClient, ObjectId } = require("mongodb");
-const jwt = require("jsonwebtoken");
 const { sendEmail } = require("./sendEmail"); // reusing your helper
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME;
-const secret = process.env.JWT_SECRET;
 
 let client;
 
@@ -20,18 +18,6 @@ exports.handler = async function (event) {
   try {
     if (event.httpMethod !== "POST") {
       return { statusCode: 405, body: "Method Not Allowed" };
-    }
-
-    // Auth check
-    const authHeader = event.headers.authorization || "";
-    const token = authHeader.replace("Bearer ", "");
-    if (!token) {
-      return { statusCode: 403, body: "Unauthorized" };
-    }
-    try {
-      jwt.verify(token, secret);
-    } catch {
-      return { statusCode: 403, body: "Forbidden" };
     }
 
     const { id, status } = JSON.parse(event.body);
@@ -63,9 +49,9 @@ exports.handler = async function (event) {
       content = `We regret to inform you that your application for <strong>${application.roleApplied}</strong> has not been successful on this occasion. We encourage you to apply again in the future.`;
     }
 
-    // Send email (NOTE: application must store their real email, not Roblox profile!)
+    // Send email
     await sendEmail(
-      application.email, // make sure your form collects real emails
+      application.email, // must be a real email address
       application.robloxName,
       content,
       subjectType
