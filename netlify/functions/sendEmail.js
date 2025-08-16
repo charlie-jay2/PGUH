@@ -118,7 +118,7 @@ exports.sendEmail = async (to, username, content = "", type = "account") => {
   <body>
     <div class="email-container">
       <div class="header">
-        <img src="https://iili.io/FLcHFcb.webp" alt="NHS Logo" />
+        <img src="https://pguh.uk/Assets/Logo2.png" alt="NHS Logo" />
       </div>
       <div class="content">
         <h1>${intro}</h1>

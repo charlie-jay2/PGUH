@@ -83,7 +83,7 @@ async function sendApplicationEmail(to, applicantName, role) {
   <body>
     <div class="email-container">
       <div class="header">
-        <img src="https://iili.io/FLcHFcb.webp" alt="NHS Logo" />
+        <img src="https://pguh.uk/Assets/Logo2.png" alt="NHS Logo" />
       </div>
       <div class="content">
         <h1>Application Successfully Submitted</h1>
