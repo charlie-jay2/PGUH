@@ -224,8 +224,8 @@
             </button>
           </div>
           <div class="form-actions" style="margin-top: 10px">
-            <button id="exportMedicalHistoryBtn" type="button">
-              Export Medical History
+            <button id="exportPdfBtn" type="button">
+              Export Medical History as PDF
             </button>
           </div>
         </form>
@@ -725,6 +725,69 @@
             document.body.removeChild(link);
           });
       })();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+      document.getElementById("exportPdfBtn").addEventListener("click", () => {
+        const element = document.body; // capture entire page
+
+        // Find the Patient ID line
+        let patientId = "UnknownID";
+        const patientIdPara = Array.from(document.querySelectorAll("p")).find(
+          (p) => p.textContent.includes("Patient ID:")
+        );
+        if (patientIdPara) {
+          patientId = patientIdPara.textContent
+            .replace("Patient ID:", "")
+            .trim();
+        }
+
+        // Select elements to hide
+        const header = document.querySelector("header.topbar");
+        const saveBtnContainer =
+          document.getElementById("saveClinicalBtn")?.parentNode;
+        const exportBtnContainer =
+          document.getElementById("exportPdfBtn")?.parentNode;
+        const footers = document.querySelectorAll("footer.footer");
+
+        // Temporarily hide elements
+        if (header) header.style.display = "none";
+        if (saveBtnContainer) saveBtnContainer.style.display = "none";
+        if (exportBtnContainer) exportBtnContainer.style.display = "none";
+        footers.forEach((f) => (f.style.display = "none"));
+
+        const opt = {
+          margin: 0.1,
+          filename: `Patient(${patientId}).pdf`,
+          image: { type: "jpeg", quality: 1 },
+          html2canvas: {
+            scale: 4,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
+            width: document.body.scrollWidth,
+            height: document.body.scrollHeight,
+          },
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+          },
+        };
+
+        html2pdf()
+          .set(opt)
+          .from(element)
+          .save()
+          .then(() => {
+            // Restore hidden elements
+            if (header) header.style.display = "";
+            if (saveBtnContainer) saveBtnContainer.style.display = "";
+            if (exportBtnContainer) exportBtnContainer.style.display = "";
+            footers.forEach((f) => (f.style.display = ""));
+          });
+      });
     </script>
   </body>
 </html>
