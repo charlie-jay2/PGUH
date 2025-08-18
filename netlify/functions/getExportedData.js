@@ -1,23 +1,31 @@
-// netlify/functions/getExportedData.js
-import { blob } from "@netlify/blobs";
+import { getStore } from "@netlify/blobs";
 
-export async function handler() {
+export default async function handler(event, context) {
   try {
-    const store = blob();
-    const metaKey = "exported_logs.json";
-    let logs = [];
-
-    try {
-      logs = await store.get(metaKey, { type: "json" });
-    } catch (err) {
-      logs = [];
+    if (event.httpMethod !== "GET") {
+      return {
+        statusCode: 405,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Method not allowed" }),
+      };
     }
+
+    const store = getStore("discharge-logs");
+
+    // List all files stored in this Blob store
+    const list = await store.list();
 
     return {
       statusCode: 200,
-      body: JSON.stringify(logs),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ files: list.blobs || [] }),
     };
   } catch (err) {
-    return { statusCode: 500, body: "Server error: " + err.message };
+    console.error("Error fetching logs:", err);
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Server error: " + err.message }),
+    };
   }
 }
