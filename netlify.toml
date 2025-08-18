@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/*"
+  to = "/downtime.html"
+  status = 200
