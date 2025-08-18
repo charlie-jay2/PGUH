@@ -1,4 +1,5 @@
 [[redirects]]
   from = "/*"
-  to = "downtime.html"
-  status = 200
+  to = "/downtime.html"
+  status = 301
+  force = true
