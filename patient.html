@@ -732,7 +732,6 @@
       document.getElementById("exportPdfBtn").addEventListener("click", () => {
         const element = document.body; // capture entire page
 
-        // Find the Patient ID line
         let patientId = "UnknownID";
         const patientIdPara = Array.from(document.querySelectorAll("p")).find(
           (p) => p.textContent.includes("Patient ID:")
@@ -743,7 +742,6 @@
             .trim();
         }
 
-        // Select elements to hide
         const header = document.querySelector("header.topbar");
         const saveBtnContainer =
           document.getElementById("saveClinicalBtn")?.parentNode;
@@ -751,7 +749,6 @@
           document.getElementById("exportPdfBtn")?.parentNode;
         const footers = document.querySelectorAll("footer.footer");
 
-        // Temporarily hide elements
         if (header) header.style.display = "none";
         if (saveBtnContainer) saveBtnContainer.style.display = "none";
         if (exportBtnContainer) exportBtnContainer.style.display = "none";
@@ -779,13 +776,35 @@
         html2pdf()
           .set(opt)
           .from(element)
-          .save()
-          .then(() => {
-            // Restore hidden elements
-            if (header) header.style.display = "";
-            if (saveBtnContainer) saveBtnContainer.style.display = "";
-            if (exportBtnContainer) exportBtnContainer.style.display = "";
-            footers.forEach((f) => (f.style.display = ""));
+          .outputPdf("blob") // instead of save()
+          .then(async (pdfBlob) => {
+            // Upload to Netlify Function
+            const formData = new FormData();
+            formData.append("file", pdfBlob, `Patient(${patientId}).pdf`);
+            formData.append("patientId", patientId);
+            formData.append("exportedAt", new Date().toISOString());
+
+            try {
+              const res = await fetch("/.netlify/functions/exportedData", {
+                method: "POST",
+                body: formData,
+              });
+
+              if (!res.ok) {
+                throw new Error(await res.text());
+              }
+
+              alert("PDF exported and uploaded successfully!");
+            } catch (err) {
+              console.error("Upload failed:", err);
+              alert("Failed to upload PDF: " + err.message);
+            } finally {
+              // Restore hidden elements
+              if (header) header.style.display = "";
+              if (saveBtnContainer) saveBtnContainer.style.display = "";
+              if (exportBtnContainer) exportBtnContainer.style.display = "";
+              footers.forEach((f) => (f.style.display = ""));
+            }
           });
       });
     </script>
