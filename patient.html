@@ -533,21 +533,6 @@
             .getElementById("inputOutcomePatient")
             .value.trim();
 
-          // Validate  latest observations
-          if (
-            !news2Score ||
-            !heartRate ||
-            !bloodPressure ||
-            !spO2 ||
-            !respiratoryRate ||
-            !temperature ||
-            !avpu ||
-            !gcs
-          ) {
-            alert("Please fill all  Latest Observations fields");
-            return;
-          }
-
           // Validate at least one clinical info field filled
           const hasAnyField =
             triage ||
