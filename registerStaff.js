@@ -42,6 +42,6 @@ async function registerStaff(username, password, role = "admin") {
 }
 
 // Defaults to admin/admin if no args given
-const [, , username = "KBlair", password = "Catto"] = process.argv;
+const [, , username = "CHughes", password = "*^5:?BZP7!D^9"] = process.argv;
 
 registerStaff(username, password);
