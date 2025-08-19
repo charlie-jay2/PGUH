@@ -1,12 +1,8 @@
-const crypto = require("crypto");
-const { MongoClient, ObjectId } = require("mongodb");
-const sendEmail = require("./sendEmail").sendEmail; // your email function
+const { MongoClient } = require("mongodb");
+const bcrypt = require("bcryptjs");
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME;
-const baseUrl =
-  process.env.BASE_URL ||
-  "https://princegeorgesuniversityhospital.netlify.app/";
 
 let client;
 
@@ -24,13 +20,14 @@ exports.handler = async function (event) {
   }
 
   try {
-    const data = JSON.parse(event.body);
-    const { username } = data;
+    const { token, username, password } = JSON.parse(event.body);
 
-    if (!username) {
+    if (!token || !username || !password) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Username is required" }),
+        body: JSON.stringify({
+          error: "Token, username, and password required",
+        }),
       };
     }
 
@@ -38,54 +35,51 @@ exports.handler = async function (event) {
     const users = db.collection("staff");
     const passwordResets = db.collection("passwordResets");
 
-    // Find user by username (case-insensitive)
-    const user = await users.findOne({
-      username: { $regex: `^${username}$`, $options: "i" },
-    });
+    // Lookup reset record
+    const resetRecord = await passwordResets.findOne({ token });
+    if (!resetRecord) {
+      return { statusCode: 400, body: "Invalid or expired reset token." };
+    }
 
-    if (!user) {
-      // For security, don't reveal user not found
+    // Check expiry
+    if (new Date() > new Date(resetRecord.expires)) {
+      return { statusCode: 400, body: "Reset token has expired." };
+    }
+
+    // Make sure username matches the token owner
+    if (resetRecord.username.toLowerCase() !== username.toLowerCase()) {
       return {
-        statusCode: 200,
-        body: JSON.stringify({
-          message: "If that username exists, a reset email has been sent.",
-        }),
+        statusCode: 400,
+        body: "Username does not match reset request.",
       };
     }
 
-    // Generate reset token (64 hex chars)
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour expiry
+    // Find the user
+    const user = await users.findOne({
+      username: { $regex: `^${username}$`, $options: "i" },
+    });
+    if (!user) {
+      return { statusCode: 404, body: "User not found." };
+    }
 
-    // Save token info in passwordResets collection
-    // Upsert so multiple resets won't duplicate
-    await passwordResets.updateOne(
-      { username: user.username },
-      {
-        $set: {
-          token: resetToken,
-          username: user.username,
-          email: user.email,
-          expires: resetExpires,
-        },
-      },
-      { upsert: true }
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update user password
+    await users.updateOne(
+      { _id: user._id },
+      { $set: { password: hashedPassword } }
     );
 
-    // Construct reset link with full URL
-    const resetLink = `${baseUrl}reset.html?token=${resetToken}`;
-
-    // Send reset email
-    await sendEmail(user.email, user.username, resetLink, "reset-link");
+    // Delete the reset record so it can’t be reused
+    await passwordResets.deleteOne({ token });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        message: "If that username exists, a reset email has been sent.",
-      }),
+      body: "Password has been reset successfully.",
     };
   } catch (error) {
-    console.error("Reset password error:", error);
+    console.error("Complete reset error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal Server Error" }),

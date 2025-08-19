@@ -10,6 +10,7 @@
     <div class="reset-container">
       <h2>Reset Your Password</h2>
       <form id="resetForm">
+        <input type="text" id="username" placeholder="Username" required />
         <input
           type="password"
           id="newPassword"
@@ -35,6 +36,8 @@
         .getElementById("resetForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+
+          const username = document.getElementById("username").value.trim();
           const newPassword = document.getElementById("newPassword").value;
           const confirmPassword =
             document.getElementById("confirmPassword").value;
@@ -48,7 +51,7 @@
           const res = await fetch("/.netlify/functions/resetPassword", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token, password: newPassword }),
+            body: JSON.stringify({ token, username, password: newPassword }),
           });
 
           const text = await res.text();
