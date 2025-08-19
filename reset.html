@@ -4,9 +4,125 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reset Password</title>
-    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --nhs-blue: #005eb8;
+        --nhs-light-blue: #0072ce;
+        --nhs-dark-blue: #003087;
+        --nhs-grey: #f0f4f5;
+        --nhs-dark-grey: #4c6272;
+        --nhs-error: #d5281b;
+        --nhs-green: #007f3b;
+      }
+
+      body {
+        font-family: "Roboto", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: var(--nhs-grey);
+        color: var(--nhs-dark-grey);
+      }
+
+      /* NHS Header Bar */
+      .nhs-header {
+        background: var(--nhs-blue);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .nhs-header img {
+        height: 40px;
+      }
+
+      .reset-container {
+        max-width: 420px;
+        margin: 60px auto;
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      h2 {
+        color: var(--nhs-blue);
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        padding: 0.75rem;
+        border: 2px solid var(--nhs-dark-grey);
+        border-radius: 4px;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--nhs-blue);
+        box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.25);
+      }
+
+      button {
+        background: var(--nhs-blue);
+        color: white;
+        border: none;
+        padding: 0.85rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: var(--nhs-light-blue);
+      }
+
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.4);
+      }
+
+      #message {
+        margin-top: 1rem;
+        font-weight: 500;
+        text-align: center;
+      }
+
+      /* Message colours */
+      #message.error {
+        color: var(--nhs-error);
+      }
+
+      #message.success {
+        color: var(--nhs-green);
+      }
+    </style>
   </head>
   <body>
+    <!-- NHS Header -->
+    <header class="nhs-header">
+      <img src="https://assets.nhs.uk/images/nhs-logo.png" alt="NHS Logo" />
+    </header>
+
+    <!-- Reset Form -->
     <div class="reset-container">
       <h2>Reset Your Password</h2>
       <form id="resetForm">
@@ -42,20 +158,30 @@
           const confirmPassword =
             document.getElementById("confirmPassword").value;
 
+          const messageEl = document.getElementById("message");
+          messageEl.className = "";
+
           if (newPassword !== confirmPassword) {
-            document.getElementById("message").textContent =
-              "Passwords do not match.";
+            messageEl.textContent = "Passwords do not match.";
+            messageEl.classList.add("error");
             return;
           }
 
-          const res = await fetch("/.netlify/functions/resetPassword", {
+          const res = await fetch("/.netlify/functions/completeResetPassword", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token, username, password: newPassword }),
           });
 
           const text = await res.text();
-          document.getElementById("message").textContent = text;
+
+          if (res.ok) {
+            messageEl.textContent = text;
+            messageEl.classList.add("success");
+          } else {
+            messageEl.textContent = text;
+            messageEl.classList.add("error");
+          }
         });
     </script>
   </body>
