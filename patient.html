@@ -127,6 +127,26 @@
               >Admitting Speciality:
               <input type="text" id="inputAdmittingSpeciality" />
             </label>
+            <br />
+            <label>
+              Clinician Notes:
+              <textarea id="inputClinicianNotes" rows="4"></textarea>
+            </label>
+
+            <label>
+              Nursing Notes:
+              <textarea id="inputNursingNotes" rows="4"></textarea>
+            </label>
+
+            <label>
+              Imaging Orders:
+              <textarea id="inputImagingOrders" rows="4"></textarea>
+            </label>
+
+            <label>
+              Bloodwork Orders:
+              <textarea id="inputBloodworkOrders" rows="4"></textarea>
+            </label>
           </fieldset>
 
           <!-- LATEST OBSERVATIONS () -->
@@ -340,34 +360,26 @@
 
         document.getElementById("patientName").textContent = patient.name;
 
-        // Remove old fields Patient ID, Age, Ward, Notes if present
-        ["patientId", "patientAge", "patientWard", "patientNotes"].forEach(
-          (id) => {
-            const el = document.getElementById(id);
-            if (el && el.parentNode) el.parentNode.removeChild(el);
-          }
-        );
-
-        // Fill the new summary vertical layout
+        // Fill summary section
         const summaryDiv = document.getElementById("patientSummary");
         summaryDiv.innerHTML = `
-          <p><strong>Roblox Name:</strong> ${patient.robloxName || "—"}</p>
-          <p><strong>Date of Birth:</strong> ${
-            patient.dateOfBirth
-              ? new Date(patient.dateOfBirth).toLocaleDateString()
-              : "—"
-          }</p>
-          <p><strong>Age:</strong> ${calculateAge(patient.dateOfBirth)}</p>
-          <p><strong>Patient ID:</strong> ${patient.patientId || "—"}</p>
-          <p><strong>Priority:</strong> ${
-            patient.priority !== undefined ? patient.priority : "—"
-          }</p>
-          <p><strong>Presenting Complaint:</strong> ${
-            patient.presentingComplaint || "—"
-          }</p>
-        `;
+      <p><strong>Roblox Name:</strong> ${patient.robloxName || "—"}</p>
+      <p><strong>Date of Birth:</strong> ${
+        patient.dateOfBirth
+          ? new Date(patient.dateOfBirth).toLocaleDateString()
+          : "—"
+      }</p>
+      <p><strong>Age:</strong> ${calculateAge(patient.dateOfBirth)}</p>
+      <p><strong>Patient ID:</strong> ${patient.patientId || "—"}</p>
+      <p><strong>Priority:</strong> ${
+        patient.priority !== undefined ? patient.priority : "—"
+      }</p>
+      <p><strong>Presenting Complaint:</strong> ${
+        patient.presentingComplaint || "—"
+      }</p>
+    `;
 
-        // Fill medical history list
+        // Medical history list
         const histList = document.getElementById("medicalHistoryList");
         histList.innerHTML = "";
         (patient.medicalHistory || []).forEach((item) => {
@@ -387,7 +399,7 @@
           histList.appendChild(li);
         });
 
-        // Load latest medical history and autofill inputs
+        // Autofill latest medical history
         try {
           const latest = await window.api.getLatestMedicalHistory(
             patientId,
@@ -400,6 +412,7 @@
             latest.allergies || "";
           document.getElementById("inputTriageTime").value =
             latest.triageTime || "";
+
           document.getElementById("inputNurse").value = latest.nurse || "";
           document.getElementById("inputOverseeingClinician").value =
             latest.overseeingClinician || "";
@@ -414,6 +427,15 @@
             latest.consultingSpeciality || "";
           document.getElementById("inputAdmittingSpeciality").value =
             latest.admittingSpeciality || "";
+          document.getElementById("inputClinicianNotes").value =
+            latest.clinicianNotes || "";
+          document.getElementById("inputNursingNotes").value =
+            latest.nursingNotes || "";
+          document.getElementById("inputImagingOrders").value =
+            latest.imagingOrders || "";
+          document.getElementById("inputBloodworkOrders").value =
+            latest.bloodworkOrders || "";
+
           document.getElementById("inputNews2Score").value =
             latest.news2Score || "";
           document.getElementById("inputHeartRate").value =
@@ -427,6 +449,7 @@
             latest.temperature || "";
           document.getElementById("inputAVPU").value = latest.avpu || "";
           document.getElementById("inputGCS").value = latest.gcs || "";
+
           document.getElementById("inputPresentingComplaint").value =
             latest.presentingComplaint || "";
           document.getElementById("inputHistoryPresentingComplaint").value =
@@ -437,6 +460,7 @@
             latest.currentMedications || "";
           document.getElementById("inputDifferentialDiagnosis").value =
             latest.differentialDiagnosis || "";
+
           document.getElementById("inputWhoDischarged").value =
             latest.whoDischarged || "";
           document.getElementById("inputTimeDischarge").value =
@@ -447,17 +471,8 @@
           console.warn("Failed to load latest medical history:", e);
         }
 
-        // Save clinical info button
+        // Save clinical info
         document.getElementById("saveClinicalBtn").onclick = async () => {
-          // Collect all inputs
-          const triage =
-            document.getElementById("inputTriage")?.value.trim() || "";
-          const primarySurvey =
-            document.getElementById("inputPrimarySurvey")?.value.trim() || "";
-          const news2Record =
-            document.getElementById("inputNews2")?.value.trim() || "";
-
-          // New fields from TRIAGE section
           const edLocation = document
             .getElementById("inputEdLocation")
             .value.trim();
@@ -466,7 +481,6 @@
             .value.trim();
           const triageTime = document.getElementById("inputTriageTime").value;
 
-          // New fields from CARE TEAM section
           const nurse = document.getElementById("inputNurse").value.trim();
           const overseeingClinician = document
             .getElementById("inputOverseeingClinician")
@@ -487,8 +501,19 @@
           const admittingSpeciality = document
             .getElementById("inputAdmittingSpeciality")
             .value.trim();
+          const clinicianNotes = document
+            .getElementById("inputClinicianNotes")
+            .value.trim();
+          const nursingNotes = document
+            .getElementById("inputNursingNotes")
+            .value.trim();
+          const imagingOrders = document
+            .getElementById("inputImagingOrders")
+            .value.trim();
+          const bloodworkOrders = document
+            .getElementById("inputBloodworkOrders")
+            .value.trim();
 
-          // New fields from LATEST OBSERVATIONS ()
           const news2Score = document.getElementById("inputNews2Score").value;
           const heartRate = document
             .getElementById("inputHeartRate")
@@ -506,7 +531,6 @@
           const avpu = document.getElementById("inputAVPU").value.trim();
           const gcs = document.getElementById("inputGCS").value.trim();
 
-          // New fields from OTHER DETAILS
           const presentingComplaint = document
             .getElementById("inputPresentingComplaint")
             .value.trim();
@@ -523,7 +547,6 @@
             .getElementById("inputDifferentialDiagnosis")
             .value.trim();
 
-          // New fields from DISCHARGE LOGS
           const whoDischarged = document
             .getElementById("inputWhoDischarged")
             .value.trim();
@@ -533,11 +556,7 @@
             .getElementById("inputOutcomePatient")
             .value.trim();
 
-          // Validate at least one clinical info field filled
           const hasAnyField =
-            triage ||
-            primarySurvey ||
-            news2Record ||
             edLocation ||
             allergies ||
             triageTime ||
@@ -549,6 +568,10 @@
             ccot ||
             consultingSpeciality ||
             admittingSpeciality ||
+            clinicianNotes ||
+            nursingNotes ||
+            imagingOrders ||
+            bloodworkOrders ||
             news2Score ||
             heartRate ||
             bloodPressure ||
@@ -572,10 +595,6 @@
           }
 
           const record = {
-            triage: triage || null,
-            primarySurvey: primarySurvey || null,
-            news2Record: news2Record || null,
-
             edLocation: edLocation || null,
             allergies: allergies || null,
             triageTime: triageTime || null,
@@ -588,6 +607,10 @@
             ccot: ccot || null,
             consultingSpeciality: consultingSpeciality || null,
             admittingSpeciality: admittingSpeciality || null,
+            clinicianNotes: clinicianNotes || null,
+            nursingNotes: nursingNotes || null,
+            imagingOrders: imagingOrders || null,
+            bloodworkOrders: bloodworkOrders || null,
 
             news2Score: news2Score || null,
             heartRate: heartRate || null,
@@ -612,13 +635,13 @@
           try {
             await window.api.addPatientRecord(patientId, record, token);
             alert("Clinical info saved successfully!");
-            window.location.reload(); // Reload to fetch latest data and autofill
+            window.location.reload();
           } catch (e) {
             alert("Failed to save clinical info: " + e.message);
           }
         };
 
-        // Export Medical History button
+        // Export Medical History CSV
         document
           .getElementById("exportMedicalHistoryBtn")
           .addEventListener("click", () => {
@@ -629,9 +652,6 @@
                 [
                   "Created At",
                   "Created By",
-                  "Triage",
-                  "Primary Survey",
-                  "NEWS2 Record",
                   "ED Location",
                   "Allergies",
                   "Triage Time",
@@ -643,6 +663,10 @@
                   "CCOT",
                   "Consulting Speciality",
                   "Admitting Speciality",
+                  "Clinician Notes",
+                  "Nursing Notes",
+                  "Imaging Orders",
+                  "Bloodwork Orders",
                   "NEWS2 Score",
                   "Heart Rate",
                   "Blood Pressure",
@@ -663,9 +687,6 @@
                 ...medicalHistory.map((rec) => [
                   rec.createdAt ? new Date(rec.createdAt).toLocaleString() : "",
                   rec.createdBy || "",
-                  rec.triage || "",
-                  rec.primarySurvey || "",
-                  rec.news2Record || "",
                   rec.edLocation || "",
                   rec.allergies || "",
                   rec.triageTime || "",
@@ -677,6 +698,10 @@
                   rec.ccot || "",
                   rec.consultingSpeciality || "",
                   rec.admittingSpeciality || "",
+                  rec.clinicianNotes || "",
+                  rec.nursingNotes || "",
+                  rec.imagingOrders || "",
+                  rec.bloodworkOrders || "",
                   rec.news2Score || "",
                   rec.heartRate || "",
                   rec.bloodPressure || "",
@@ -711,6 +736,7 @@
           });
       })();
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
