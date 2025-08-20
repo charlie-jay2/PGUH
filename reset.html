@@ -167,7 +167,7 @@
             return;
           }
 
-          const res = await fetch("/.netlify/functions/completeResetPassword", {
+          const res = await fetch("/.netlify/functions/resetPassword", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token, username, password: newPassword }),
