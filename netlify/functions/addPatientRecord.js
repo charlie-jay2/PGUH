@@ -19,7 +19,7 @@ exports.handler = async function (event) {
       return { statusCode: 400, body: "Missing patient ID" };
     }
 
-    // Build clinical record with all fields, fallback to null
+    // Build clinical record with all fields, fallback to null or empty string
     const record = {
       triage: data.triage || null,
       primarySurvey: data.primarySurvey || null,
@@ -56,12 +56,6 @@ exports.handler = async function (event) {
       pastMedicalHistory: data.pastMedicalHistory || null,
       currentMedications: data.currentMedications || null,
       differentialDiagnosis: data.differentialDiagnosis || null,
-
-      // NEW FREE-TEXT FIELDS
-      clinicianNotes: data.clinicianNotes || null,
-      nursingNotes: data.nursingNotes || null,
-      imagingOrders: data.imagingOrders || null,
-      bloodworkOrders: data.bloodworkOrders || null,
 
       // DISCHARGE LOGS
       whoDischarged: data.whoDischarged || null,
