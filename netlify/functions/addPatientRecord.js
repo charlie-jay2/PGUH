@@ -3,6 +3,7 @@
 const { connectToDatabase } = require("./_mongodb");
 const { verifyTokenFromHeaders } = require("./_auth");
 const { ObjectId } = require("mongodb");
+const fetch = require("node-fetch");
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
@@ -86,6 +87,53 @@ exports.handler = async function (event) {
         statusCode: 404,
         body: "Patient not found or no update performed",
       };
+    }
+
+    // Send log to Discord
+    if (process.env.DISCORD_WEBHOOK_URL) {
+      const message = {
+        username: "Patient Logger",
+        embeds: [
+          {
+            title: "📋 New Clinical Record Added",
+            color: 0x1d5fad,
+            fields: [
+              { name: "Patient ID", value: id, inline: true },
+              { name: "Created By", value: record.createdBy, inline: true },
+              {
+                name: "ED Location",
+                value: record.edLocation || "N/A",
+                inline: true,
+              },
+              {
+                name: "Triage Time",
+                value: record.triageTime || "N/A",
+                inline: true,
+              },
+              {
+                name: "NEWS2 Score",
+                value: record.news2Score?.toString() || "N/A",
+                inline: true,
+              },
+              {
+                name: "Primary Complaint",
+                value: record.presentingComplaint || "N/A",
+              },
+            ],
+            footer: { text: `Created at ${record.createdAt.toISOString()}` },
+          },
+        ],
+      };
+
+      try {
+        await fetch(process.env.DISCORD_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(message),
+        });
+      } catch (discordErr) {
+        console.error("Discord webhook failed:", discordErr);
+      }
     }
 
     return {
