@@ -63,6 +63,14 @@
       .download-button:hover {
         background-color: #00305a;
       }
+
+      .download-button.disabled {
+        pointer-events: none; /* disables clicking */
+        opacity: 0.5; /* makes it look disabled */
+        cursor: default;
+        text-decoration: none;
+        color: gray; /* optional, makes text look inactive */
+      }
     </style>
   </head>
   <body>
@@ -76,8 +84,7 @@
       </a>
       <a
         href="./Assets/app-release.apk"
-        class="download-button"
-        download
+        class="download-button disabled"
         aria-disabled="true"
       >
         Download the OFFICIAL PGUH ANDROID app
