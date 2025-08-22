@@ -1,29 +1,54 @@
 import { getStore } from "@netlify/blobs";
+import formidable from "formidable";
 
-export async function handler(event) {
+export const config = {
+  api: {
+    bodyParser: false, // don’t let Netlify auto-parse
+  },
+};
+
+export async function handler(event, context) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
   }
 
-  const boundary = event.headers["content-type"].split("boundary=")[1];
-  const body = Buffer.from(event.body, "base64").toString();
+  try {
+    const form = formidable({ multiples: false });
 
-  // crude parse for file
-  const parts = body.split(boundary);
-  const filePart = parts.find((p) => p.includes("application/pdf"));
-  if (!filePart) return { statusCode: 400, body: "No PDF found" };
+    const parsed = await new Promise((resolve, reject) => {
+      form.parse(
+        {
+          headers: event.headers,
+          // Netlify passes body as base64
+          // formidable wants a stream:
+          // we create a fake IncomingMessage
+          // with body turned into Buffer
+          on: (name, fn) => {}, // ignore
+        },
+        (err, fields, files) => {
+          if (err) reject(err);
+          else resolve({ fields, files });
+        }
+      );
+    });
 
-  const raw = filePart.split("\r\n\r\n")[1];
-  const trimmed = raw.slice(0, raw.lastIndexOf("--") - 2);
-  const buffer = Buffer.from(trimmed, "binary");
+    const file = Object.values(parsed.files)[0];
+    if (!file) {
+      return { statusCode: 400, body: "No file found" };
+    }
 
-  const key = `patient-${Date.now()}.pdf`;
+    const fs = await import("fs/promises");
+    const buffer = await fs.readFile(file.filepath);
 
-  const store = getStore("patient-pdfs", { consistency: "strong" });
-  await store.set(key, buffer, { type: "application/pdf" });
+    const key = `patient-${Date.now()}.pdf`;
+    const store = getStore("patient-pdfs", { consistency: "strong" });
+    await store.set(key, buffer, { type: "application/pdf" });
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ key }),
-  };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ key }),
+    };
+  } catch (err) {
+    return { statusCode: 500, body: "Upload failed: " + err.message };
+  }
 }
