@@ -129,12 +129,12 @@
             </label>
           </fieldset>
 
-          <!-- LATEST OBSERVATIONS () -->
-          <fieldset>
+          <!-- LATEST OBSERVATIONS -->
+          <fieldset class="latest-observations">
             <legend><strong>LATEST OBSERVATIONS ()</strong></legend>
 
-            <label
-              >NEWS2 SCORE:
+            <label>
+              NEWS2 SCORE:
               <select id="inputNews2Score">
                 <option value="">Select Score</option>
                 <option value="0">0</option>
@@ -143,34 +143,55 @@
                 <option value="3">3</option>
               </select>
             </label>
-            <label
-              >HR (Heart Rate):
+            <label>
+              HR (Heart Rate):
               <input type="number" id="inputHeartRate" min="0" />
             </label>
-            <label
-              >BP (Blood Pressure):
+            <label>
+              BP (Blood Pressure):
               <input type="text" id="inputBloodPressure" />
             </label>
-            <label
-              >SpO2 (Blood Oxygen):
+            <label>
+              SpO2 (Blood Oxygen):
               <input type="number" id="inputSpO2" min="0" max="100" />
             </label>
-            <label
-              >RR (Respiratory Rate):
+            <label>
+              RR (Respiratory Rate):
               <input type="number" id="inputRespiratoryRate" min="0" />
             </label>
-            <label
-              >Temperature:
+            <label>
+              Temperature:
               <input type="number" id="inputTemperature" step="0.1" />
             </label>
-            <label
-              >AVPU:
+            <label>
+              AVPU:
               <input type="text" id="inputAVPU" />
             </label>
-            <label
-              >GCS:
+            <label>
+              GCS:
               <input type="text" id="inputGCS" />
             </label>
+
+            <!-- Image is now properly inside the same fieldset -->
+            <div
+              style="
+                grid-column: 1 / -1;
+                text-align: center;
+                margin: 30px auto 0 auto;
+              "
+            >
+              <img
+                id="news2Chart"
+                src="./Assets/NEWS2chart.png"
+                alt="NEWS2 Chart"
+                style="
+                  width: 100%;
+                  max-width: 1000px;
+                  height: auto;
+                  cursor: auto;
+                "
+              />
+            </div>
           </fieldset>
 
           <!-- OTHER DETAILS -->
