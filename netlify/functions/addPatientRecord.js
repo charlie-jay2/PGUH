@@ -1,7 +1,6 @@
 // netlify/functions/addPatientRecord.js
 
 const { connectToDatabase } = require("./_mongodb");
-const { verifyTokenFromHeaders } = require("./_auth");
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
 
@@ -11,12 +10,6 @@ exports.handler = async function (event) {
   }
 
   try {
-    // Verify the token
-    const user = verifyTokenFromHeaders(event.headers);
-    if (!user) {
-      return { statusCode: 401, body: "Unauthorized: Invalid token" };
-    }
-
     // Parse request body
     const data = JSON.parse(event.body || "{}");
     const { id } = data;
@@ -63,7 +56,7 @@ exports.handler = async function (event) {
       outcomePatient: data.outcomePatient || null,
 
       createdAt: new Date(),
-      createdBy: user?.username || "staff",
+      createdBy: data.createdBy || "staff",
     };
 
     // Connect to MongoDB
@@ -140,8 +133,6 @@ exports.handler = async function (event) {
     };
   } catch (err) {
     console.error("Error in addPatientRecord:", err);
-    const status =
-      err.code === "NO_AUTH" || err.code === "INVALID_TOKEN" ? 401 : 500;
-    return { statusCode: status, body: err.message };
+    return { statusCode: 500, body: err.message };
   }
 };

@@ -1,7 +1,6 @@
 // netlify/functions/getLatestMedicalHistory.js
 
 const { connectToDatabase } = require("./_mongodb");
-const { verifyTokenFromHeaders } = require("./_auth");
 const { ObjectId } = require("mongodb");
 
 exports.handler = async function (event) {
@@ -10,8 +9,6 @@ exports.handler = async function (event) {
   }
 
   try {
-    verifyTokenFromHeaders(event.headers);
-
     const id = event.queryStringParameters && event.queryStringParameters.id;
     if (!id) {
       return { statusCode: 400, body: "Missing patient ID" };
@@ -40,8 +37,6 @@ exports.handler = async function (event) {
     };
   } catch (err) {
     console.error(err);
-    const status =
-      err.code === "NO_AUTH" || err.code === "INVALID_TOKEN" ? 401 : 500;
-    return { statusCode: status, body: String(err.message) };
+    return { statusCode: 500, body: String(err.message) };
   }
 };
