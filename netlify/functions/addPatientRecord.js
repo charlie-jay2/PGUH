@@ -11,27 +11,29 @@ exports.handler = async function (event) {
   }
 
   try {
-    const user = verifyTokenFromHeaders(event.headers); // returns user payload
+    // Verify the token
+    const user = verifyTokenFromHeaders(event.headers);
+    if (!user) {
+      return { statusCode: 401, body: "Unauthorized: Invalid token" };
+    }
 
+    // Parse request body
     const data = JSON.parse(event.body || "{}");
     const { id } = data;
-
     if (!id) {
       return { statusCode: 400, body: "Missing patient ID" };
     }
 
-    // Build clinical record with all fields, fallback to null or empty string
+    // Build clinical record
     const record = {
       triage: data.triage || null,
       primarySurvey: data.primarySurvey || null,
       news2Record: data.news2Record || null,
 
-      // TRIAGE Section
       edLocation: data.edLocation || null,
       allergies: data.allergies || null,
       triageTime: data.triageTime || null,
 
-      // CARE TEAM Section
       nurse: data.nurse || null,
       overseeingClinician: data.overseeingClinician || null,
       directClinician: data.directClinician || null,
@@ -41,7 +43,6 @@ exports.handler = async function (event) {
       consultingSpeciality: data.consultingSpeciality || null,
       admittingSpeciality: data.admittingSpeciality || null,
 
-      // LATEST OBSERVATIONS
       news2Score: data.news2Score || null,
       heartRate: data.heartRate || null,
       bloodPressure: data.bloodPressure || null,
@@ -51,14 +52,12 @@ exports.handler = async function (event) {
       avpu: data.avpu || null,
       gcs: data.gcs || null,
 
-      // OTHER DETAILS
       presentingComplaint: data.presentingComplaint || null,
       historyPresentingComplaint: data.historyPresentingComplaint || null,
       pastMedicalHistory: data.pastMedicalHistory || null,
       currentMedications: data.currentMedications || null,
       differentialDiagnosis: data.differentialDiagnosis || null,
 
-      // DISCHARGE LOGS
       whoDischarged: data.whoDischarged || null,
       timeDischarge: data.timeDischarge || null,
       outcomePatient: data.outcomePatient || null,
@@ -67,13 +66,14 @@ exports.handler = async function (event) {
       createdBy: user?.username || "staff",
     };
 
+    // Connect to MongoDB
     const db = await connectToDatabase(
       process.env.MONGODB_URI,
       process.env.DB_NAME
     );
     const patientsCol = db.collection("patients");
 
-    // Push record to medicalHistory AND update latestClinicalInfo field
+    // Push record and update latestClinicalInfo
     const updateResult = await patientsCol.updateOne(
       { _id: new ObjectId(id) },
       {
@@ -83,13 +83,10 @@ exports.handler = async function (event) {
     );
 
     if (updateResult.modifiedCount === 0) {
-      return {
-        statusCode: 404,
-        body: "Patient not found or no update performed",
-      };
+      return { statusCode: 404, body: "Patient not found" };
     }
 
-    // Send log to Discord
+    // Send log to Discord if webhook exists
     if (process.env.DISCORD_WEBHOOK_URL) {
       const message = {
         username: "Patient Logger",
@@ -142,9 +139,9 @@ exports.handler = async function (event) {
       body: JSON.stringify({ success: true }),
     };
   } catch (err) {
-    console.error(err);
+    console.error("Error in addPatientRecord:", err);
     const status =
       err.code === "NO_AUTH" || err.code === "INVALID_TOKEN" ? 401 : 500;
-    return { statusCode: status, body: String(err.message) };
+    return { statusCode: status, body: err.message };
   }
 };
