@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Patient PDFs</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td,
+      th {
+        border: 1px solid #ccc;
+        padding: 8px;
+      }
+      iframe {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Patient PDFs</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Preview</th>
+        </tr>
+      </thead>
+      <tbody id="pdfTable"></tbody>
+    </table>
+
+    <script>
+      async function loadPdfs() {
+        const res = await fetch("/.netlify/functions/listPdfs");
+        const items = await res.json();
+        const tbody = document.getElementById("pdfTable");
+        items.forEach(({ key }) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td>${key}</td>
+          <td><iframe src="/.netlify/functions/getPdf?key=${encodeURIComponent(
+            key
+          )}" width="400" height="300"></iframe></td>
+        `;
+          tbody.appendChild(row);
+        });
+      }
+      loadPdfs();
+    </script>
+  </body>
+</html>
