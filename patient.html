@@ -259,40 +259,37 @@
 
       window.api = {
         async getPatient(id, token) {
+          if (!token) throw new Error("No auth token found");
           const res = await fetch(
             `/.netlify/functions/getPatientById?id=${id}`,
             {
               method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
-          if (!res.ok) {
+          if (!res.ok)
             throw new Error(`Error fetching patient: ${res.statusText}`);
-          }
           return res.json();
         },
 
         async getLatestMedicalHistory(id, token) {
+          if (!token) throw new Error("No auth token found");
           const res = await fetch(
             `/.netlify/functions/getLatestMedicalHistory?id=${id}`,
             {
               method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
-          if (!res.ok) {
+          if (!res.ok)
             throw new Error(
               `Error fetching latest medical history: ${res.statusText}`
             );
-          }
           return res.json();
         },
 
         async addPatientRecord(id, record, token) {
+          if (!token) throw new Error("No auth token found");
           const res = await fetch(`/.netlify/functions/addPatientRecord`, {
             method: "POST",
             headers: {
@@ -301,8 +298,14 @@
             },
             body: JSON.stringify({ id, ...record }),
           });
+          if (res.status === 401) {
+            alert("Session expired or unauthorized. Please log in again.");
+            window.location.href = "index.html";
+            return;
+          }
           if (!res.ok) {
-            throw new Error(`Error saving clinical record: ${res.statusText}`);
+            const text = await res.text();
+            throw new Error(`Failed to save clinical record: ${text}`);
           }
           return res.json();
         },
@@ -340,32 +343,24 @@
 
         document.getElementById("patientName").textContent = patient.name;
 
-        // Remove old fields Patient ID, Age, Ward, Notes if present
-        ["patientId", "patientAge", "patientWard", "patientNotes"].forEach(
-          (id) => {
-            const el = document.getElementById(id);
-            if (el && el.parentNode) el.parentNode.removeChild(el);
-          }
-        );
-
         // Fill the new summary vertical layout
         const summaryDiv = document.getElementById("patientSummary");
         summaryDiv.innerHTML = `
-          <p><strong>Roblox Name:</strong> ${patient.robloxName || "—"}</p>
-          <p><strong>Date of Birth:</strong> ${
-            patient.dateOfBirth
-              ? new Date(patient.dateOfBirth).toLocaleDateString()
-              : "—"
-          }</p>
-          <p><strong>Age:</strong> ${calculateAge(patient.dateOfBirth)}</p>
-          <p><strong>Patient ID:</strong> ${patient.patientId || "—"}</p>
-          <p><strong>Priority:</strong> ${
-            patient.priority !== undefined ? patient.priority : "—"
-          }</p>
-          <p><strong>Presenting Complaint:</strong> ${
-            patient.presentingComplaint || "—"
-          }</p>
-        `;
+      <p><strong>Roblox Name:</strong> ${patient.robloxName || "—"}</p>
+      <p><strong>Date of Birth:</strong> ${
+        patient.dateOfBirth
+          ? new Date(patient.dateOfBirth).toLocaleDateString()
+          : "—"
+      }</p>
+      <p><strong>Age:</strong> ${calculateAge(patient.dateOfBirth)}</p>
+      <p><strong>Patient ID:</strong> ${patient.patientId || "—"}</p>
+      <p><strong>Priority:</strong> ${
+        patient.priority !== undefined ? patient.priority : "—"
+      }</p>
+      <p><strong>Presenting Complaint:</strong> ${
+        patient.presentingComplaint || "—"
+      }</p>
+    `;
 
         // Fill medical history list
         const histList = document.getElementById("medicalHistoryList");
@@ -373,15 +368,14 @@
         (patient.medicalHistory || []).forEach((item) => {
           const li = document.createElement("li");
           let text = "";
-          if (typeof item === "string") {
-            text = item;
-          } else {
+          if (typeof item === "string") text = item;
+          else {
             if (item.createdAt)
               text += `Date: ${new Date(item.createdAt).toLocaleString()}\n`;
             if (item.triage) text += `Triage: ${item.triage}\n`;
             if (item.primarySurvey)
               text += `Primary Survey: ${item.primarySurvey}\n`;
-            if (item.news2Record) text += `NEWS 2: ${item.news2Record}`;
+            if (item.news2Record) text += `NEWS2: ${item.news2Record}\n`;
           }
           li.textContent = text;
           histList.appendChild(li);
@@ -393,235 +387,48 @@
             patientId,
             token
           );
-
-          document.getElementById("inputEdLocation").value =
-            latest.edLocation || "";
-          document.getElementById("inputAllergies").value =
-            latest.allergies || "";
-          document.getElementById("inputTriageTime").value =
-            latest.triageTime || "";
-          document.getElementById("inputNurse").value = latest.nurse || "";
-          document.getElementById("inputOverseeingClinician").value =
-            latest.overseeingClinician || "";
-          document.getElementById("inputDirectClinician").value =
-            latest.directClinician || "";
-          document.getElementById("inputSpecialistClinician").value =
-            latest.specialistClinician || "";
-          document.getElementById("inputPharmacist").value =
-            latest.pharmacist || "";
-          document.getElementById("inputCCOT").value = latest.ccot || "";
-          document.getElementById("inputConsultingSpeciality").value =
-            latest.consultingSpeciality || "";
-          document.getElementById("inputAdmittingSpeciality").value =
-            latest.admittingSpeciality || "";
-          document.getElementById("inputNews2Score").value =
-            latest.news2Score || "";
-          document.getElementById("inputHeartRate").value =
-            latest.heartRate || "";
-          document.getElementById("inputBloodPressure").value =
-            latest.bloodPressure || "";
-          document.getElementById("inputSpO2").value = latest.spO2 || "";
-          document.getElementById("inputRespiratoryRate").value =
-            latest.respiratoryRate || "";
-          document.getElementById("inputTemperature").value =
-            latest.temperature || "";
-          document.getElementById("inputAVPU").value = latest.avpu || "";
-          document.getElementById("inputGCS").value = latest.gcs || "";
-          document.getElementById("inputPresentingComplaint").value =
-            latest.presentingComplaint || "";
-          document.getElementById("inputHistoryPresentingComplaint").value =
-            latest.historyPresentingComplaint || "";
-          document.getElementById("inputPastMedicalHistory").value =
-            latest.pastMedicalHistory || "";
-          document.getElementById("inputCurrentMedications").value =
-            latest.currentMedications || "";
-          document.getElementById("inputDifferentialDiagnosis").value =
-            latest.differentialDiagnosis || "";
-          document.getElementById("inputWhoDischarged").value =
-            latest.whoDischarged || "";
-          document.getElementById("inputTimeDischarge").value =
-            latest.timeDischarge || "";
-          document.getElementById("inputOutcomePatient").value =
-            latest.outcomePatient || "";
+          Object.entries(latest).forEach(([key, value]) => {
+            const el = document.getElementById(
+              `input${key.charAt(0).toUpperCase()}${key.slice(1)}`
+            );
+            if (el) el.value = value || "";
+          });
         } catch (e) {
           console.warn("Failed to load latest medical history:", e);
         }
 
         // Save clinical info button
         document.getElementById("saveClinicalBtn").onclick = async () => {
-          // Collect all inputs
-          const triage =
-            document.getElementById("inputTriage")?.value.trim() || "";
-          const primarySurvey =
-            document.getElementById("inputPrimarySurvey")?.value.trim() || "";
-          const news2Record =
-            document.getElementById("inputNews2")?.value.trim() || "";
+          const record = {};
+          document
+            .querySelectorAll(
+              "#clinicalInfoForm input, #clinicalInfoForm textarea, #clinicalInfoForm select"
+            )
+            .forEach((el) => {
+              const key = el.id.replace(/^input/, "");
+              record[key.charAt(0).toLowerCase() + key.slice(1)] =
+                el.value.trim() || null;
+            });
 
-          // New fields from TRIAGE section
-          const edLocation = document
-            .getElementById("inputEdLocation")
-            .value.trim();
-          const allergies = document
-            .getElementById("inputAllergies")
-            .value.trim();
-          const triageTime = document.getElementById("inputTriageTime").value;
-
-          // New fields from CARE TEAM section
-          const nurse = document.getElementById("inputNurse").value.trim();
-          const overseeingClinician = document
-            .getElementById("inputOverseeingClinician")
-            .value.trim();
-          const directClinician = document
-            .getElementById("inputDirectClinician")
-            .value.trim();
-          const specialistClinician = document
-            .getElementById("inputSpecialistClinician")
-            .value.trim();
-          const pharmacist = document
-            .getElementById("inputPharmacist")
-            .value.trim();
-          const ccot = document.getElementById("inputCCOT").value.trim();
-          const consultingSpeciality = document
-            .getElementById("inputConsultingSpeciality")
-            .value.trim();
-          const admittingSpeciality = document
-            .getElementById("inputAdmittingSpeciality")
-            .value.trim();
-
-          // New fields from LATEST OBSERVATIONS ()
-          const news2Score = document.getElementById("inputNews2Score").value;
-          const heartRate = document
-            .getElementById("inputHeartRate")
-            .value.trim();
-          const bloodPressure = document
-            .getElementById("inputBloodPressure")
-            .value.trim();
-          const spO2 = document.getElementById("inputSpO2").value.trim();
-          const respiratoryRate = document
-            .getElementById("inputRespiratoryRate")
-            .value.trim();
-          const temperature = document
-            .getElementById("inputTemperature")
-            .value.trim();
-          const avpu = document.getElementById("inputAVPU").value.trim();
-          const gcs = document.getElementById("inputGCS").value.trim();
-
-          // New fields from OTHER DETAILS
-          const presentingComplaint = document
-            .getElementById("inputPresentingComplaint")
-            .value.trim();
-          const historyPresentingComplaint = document
-            .getElementById("inputHistoryPresentingComplaint")
-            .value.trim();
-          const pastMedicalHistory = document
-            .getElementById("inputPastMedicalHistory")
-            .value.trim();
-          const currentMedications = document
-            .getElementById("inputCurrentMedications")
-            .value.trim();
-          const differentialDiagnosis = document
-            .getElementById("inputDifferentialDiagnosis")
-            .value.trim();
-
-          // New fields from DISCHARGE LOGS
-          const whoDischarged = document
-            .getElementById("inputWhoDischarged")
-            .value.trim();
-          const timeDischarge =
-            document.getElementById("inputTimeDischarge").value;
-          const outcomePatient = document
-            .getElementById("inputOutcomePatient")
-            .value.trim();
-
-          // Validate at least one clinical info field filled
-          const hasAnyField =
-            triage ||
-            primarySurvey ||
-            news2Record ||
-            edLocation ||
-            allergies ||
-            triageTime ||
-            nurse ||
-            overseeingClinician ||
-            directClinician ||
-            specialistClinician ||
-            pharmacist ||
-            ccot ||
-            consultingSpeciality ||
-            admittingSpeciality ||
-            news2Score ||
-            heartRate ||
-            bloodPressure ||
-            spO2 ||
-            respiratoryRate ||
-            temperature ||
-            avpu ||
-            gcs ||
-            presentingComplaint ||
-            historyPresentingComplaint ||
-            pastMedicalHistory ||
-            currentMedications ||
-            differentialDiagnosis ||
-            whoDischarged ||
-            timeDischarge ||
-            outcomePatient;
-
+          const hasAnyField = Object.values(record).some((v) => v !== null);
           if (!hasAnyField) {
             alert("Please fill at least one field before saving.");
             return;
           }
 
-          const record = {
-            triage: triage || null,
-            primarySurvey: primarySurvey || null,
-            news2Record: news2Record || null,
-
-            edLocation: edLocation || null,
-            allergies: allergies || null,
-            triageTime: triageTime || null,
-
-            nurse: nurse || null,
-            overseeingClinician: overseeingClinician || null,
-            directClinician: directClinician || null,
-            specialistClinician: specialistClinician || null,
-            pharmacist: pharmacist || null,
-            ccot: ccot || null,
-            consultingSpeciality: consultingSpeciality || null,
-            admittingSpeciality: admittingSpeciality || null,
-
-            news2Score: news2Score || null,
-            heartRate: heartRate || null,
-            bloodPressure: bloodPressure || null,
-            spO2: spO2 || null,
-            respiratoryRate: respiratoryRate || null,
-            temperature: temperature || null,
-            avpu: avpu || null,
-            gcs: gcs || null,
-
-            presentingComplaint: presentingComplaint || null,
-            historyPresentingComplaint: historyPresentingComplaint || null,
-            pastMedicalHistory: pastMedicalHistory || null,
-            currentMedications: currentMedications || null,
-            differentialDiagnosis: differentialDiagnosis || null,
-
-            whoDischarged: whoDischarged || null,
-            timeDischarge: timeDischarge || null,
-            outcomePatient: outcomePatient || null,
-          };
-
           try {
             await window.api.addPatientRecord(patientId, record, token);
             alert("Clinical info saved successfully!");
-            window.location.reload(); // Reload to fetch latest data and autofill
+            window.location.reload();
           } catch (e) {
             alert("Failed to save clinical info: " + e.message);
           }
         };
 
-        // Export Medical History button
+        // Export Medical History CSV
         document
           .getElementById("exportMedicalHistoryBtn")
-          .addEventListener("click", () => {
+          ?.addEventListener("click", () => {
             const medicalHistory = patient.medicalHistory || [];
             const csvContent =
               "data:text/csv;charset=utf-8," +
@@ -708,6 +515,56 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+          });
+
+        // Export PDF
+        document
+          .getElementById("exportPdfBtn")
+          .addEventListener("click", () => {
+            const element = document.body;
+            let patientId = "UnknownID";
+            const patientIdPara = Array.from(
+              document.querySelectorAll("p")
+            ).find((p) => p.textContent.includes("Patient ID:"));
+            if (patientIdPara)
+              patientId = patientIdPara.textContent
+                .replace("Patient ID:", "")
+                .trim();
+
+            const header = document.querySelector("header.topbar");
+            const saveBtnContainer =
+              document.getElementById("saveClinicalBtn")?.parentNode;
+            const exportBtnContainer =
+              document.getElementById("exportPdfBtn")?.parentNode;
+            const footers = document.querySelectorAll("footer.footer");
+            if (header) header.style.display = "none";
+            if (saveBtnContainer) saveBtnContainer.style.display = "none";
+            if (exportBtnContainer) exportBtnContainer.style.display = "none";
+            footers.forEach((f) => (f.style.display = "none"));
+
+            html2pdf()
+              .set({
+                margin: 0.1,
+                filename: `Patient(${patientId}).pdf`,
+                image: { type: "jpeg", quality: 1 },
+                html2canvas: {
+                  scale: 4,
+                  useCORS: true,
+                  scrollX: 0,
+                  scrollY: 0,
+                  width: document.body.scrollWidth,
+                  height: document.body.scrollHeight,
+                },
+                jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+              })
+              .from(element)
+              .save()
+              .then(() => {
+                if (header) header.style.display = "";
+                if (saveBtnContainer) saveBtnContainer.style.display = "";
+                if (exportBtnContainer) exportBtnContainer.style.display = "";
+                footers.forEach((f) => (f.style.display = ""));
+              });
           });
       })();
     </script>
