@@ -590,7 +590,6 @@
       })();
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <script>
       document
         .getElementById("exportPdfBtn")
@@ -621,19 +620,18 @@
             .from(element)
             .toPdf()
             .get("pdf")
-            .then((pdf) => {
-              return new Blob([pdf.output("arraybuffer")], {
-                type: "application/pdf",
-              });
-            });
+            .then(
+              (pdf) =>
+                new Blob([pdf.output("arraybuffer")], {
+                  type: "application/pdf",
+                })
+            );
 
-          // Upload to Netlify Blob Storage via function
-          const formData = new FormData();
-          formData.append("file", pdfBlob, `Patient-${patientId}.pdf`);
-
+          // Upload PDF directly as raw bytes (no FormData)
           const res = await fetch("/.netlify/functions/uploadPdf", {
             method: "POST",
-            body: formData,
+            body: pdfBlob,
+            headers: { "Content-Type": "application/pdf" },
           });
 
           if (!res.ok) {
