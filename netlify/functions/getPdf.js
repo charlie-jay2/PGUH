@@ -1,23 +1,43 @@
-import { getStore } from "@netlify/blobs";
+// netlify/functions/getPdf.js
+const { connectToDatabase } = require("./_mongodb");
+const { GridFSBucket } = require("mongodb");
 
-export async function handler(event) {
-  const key = event.queryStringParameters.key;
-  if (!key) return { statusCode: 400, body: "Missing key" };
+exports.handler = async function (event) {
+  try {
+    const filename = event.queryStringParameters.filename;
+    if (!filename) {
+      return { statusCode: 400, body: "Missing filename" };
+    }
 
-  const store = getStore("patient-pdfs");
-  const blob = await store.get(key, { type: "arrayBuffer" });
+    const db = await connectToDatabase(
+      process.env.MONGODB_URI,
+      process.env.DB_NAME
+    );
 
-  if (!blob) return { statusCode: 404, body: "Not found" };
+    const bucket = new GridFSBucket(db, { bucketName: "pdfs" });
 
-  const buffer = Buffer.from(blob);
+    const chunks = [];
+    await new Promise((resolve, reject) => {
+      bucket
+        .openDownloadStreamByName(filename)
+        .on("data", (chunk) => chunks.push(chunk))
+        .on("error", reject)
+        .on("end", resolve);
+    });
 
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": "inline",
-    },
-    body: buffer.toString("base64"),
-    isBase64Encoded: true,
-  };
-}
+    const buffer = Buffer.concat(chunks);
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${filename}"`,
+      },
+      body: buffer.toString("base64"),
+      isBase64Encoded: true,
+    };
+  } catch (err) {
+    console.error("Error getting PDF:", err);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  }
+};

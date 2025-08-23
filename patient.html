@@ -606,7 +606,7 @@
               .trim();
           }
 
-          // Generate PDF as Blob
+          // Generate PDF as ArrayBuffer
           const opt = {
             margin: 0.1,
             filename: `Patient(${patientId}).pdf`,
@@ -615,30 +615,28 @@
             jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
           };
 
-          const pdfBlob = await html2pdf()
+          const pdfArrayBuffer = await html2pdf()
             .set(opt)
             .from(element)
             .toPdf()
             .get("pdf")
-            .then(
-              (pdf) =>
-                new Blob([pdf.output("arraybuffer")], {
-                  type: "application/pdf",
-                })
-            );
+            .then((pdf) => pdf.output("arraybuffer"));
 
-          // Upload PDF directly as raw bytes (no FormData)
+          // Upload to Netlify function (PDF as raw bytes)
           const res = await fetch("/.netlify/functions/uploadPdf", {
             method: "POST",
-            body: pdfBlob,
-            headers: { "Content-Type": "application/pdf" },
+            body: pdfArrayBuffer,
+            headers: {
+              "Content-Type": "application/pdf",
+              "x-patient-id": patientId, // custom header for MongoDB metadata
+            },
           });
 
           if (!res.ok) {
-            alert("Failed to upload PDF");
+            alert("❌ Failed to upload PDF");
           } else {
             alert(
-              "PDF uploaded successfully! You can view it on the PDFs page."
+              "✅ PDF uploaded successfully! You can view it on the PDFs page."
             );
           }
         });

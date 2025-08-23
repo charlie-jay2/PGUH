@@ -1,0 +1,10 @@
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/.netlify/functions/uploadPdf"
+  [headers.values]
+  Content-Type = "application/pdf"
+
+[build.environment]
+  NETLIFY_DEV_BINARY_MEDIA_TYPES = "application/pdf"

@@ -1,32 +1,51 @@
-import { getStore } from "@netlify/blobs";
+// netlify/functions/uploadPdf.js
+const { connectToDatabase } = require("./_mongodb");
+const { GridFSBucket } = require("mongodb");
 
-export const config = {
-  api: {
-    bodyParser: false, // allow raw binary body
-  },
-};
-
-export async function handler(event) {
+exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method not allowed" };
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    // Netlify passes raw body as base64 when bodyParser: false
-    const buffer = Buffer.from(event.body, "base64");
+    // Get raw PDF bytes
+    const pdfBuffer = Buffer.from(event.body, "base64"); // Netlify passes body as base64 when binary
+    const patientId = event.headers["x-patient-id"] || "Unknown";
 
-    const key = `patient-${Date.now()}.pdf`;
-    const store = getStore("patient-pdfs", { consistency: "strong" });
-    await store.set(key, buffer, { type: "application/pdf" });
+    const db = await connectToDatabase(
+      process.env.MONGODB_URI,
+      process.env.DB_NAME
+    );
+
+    const bucket = new GridFSBucket(db, { bucketName: "pdfs" });
+
+    // Upload stream into GridFS
+    await new Promise((resolve, reject) => {
+      const uploadStream = bucket.openUploadStream(
+        `Patient(${patientId}).pdf`,
+        {
+          metadata: { patientId, uploadedAt: new Date() },
+        }
+      );
+
+      uploadStream.end(pdfBuffer, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ key }),
+      body: JSON.stringify({
+        success: true,
+        message: "PDF uploaded to MongoDB",
+      }),
     };
   } catch (err) {
+    console.error("Upload error:", err);
     return {
       statusCode: 500,
-      body: "Upload failed: " + err.message,
+      body: JSON.stringify({ error: err.message }),
     };
   }
-}
+};

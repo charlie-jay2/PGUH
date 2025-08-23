@@ -3,6 +3,10 @@
   <head>
     <title>Patient PDFs</title>
     <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
       table {
         border-collapse: collapse;
         width: 100%;
@@ -22,7 +26,9 @@
     <table>
       <thead>
         <tr>
-          <th>File</th>
+          <th>Filename</th>
+          <th>Patient ID</th>
+          <th>Uploaded</th>
           <th>Preview</th>
         </tr>
       </thead>
@@ -31,19 +37,31 @@
 
     <script>
       async function loadPdfs() {
-        const res = await fetch("/.netlify/functions/listPdfs");
-        const items = await res.json();
-        const tbody = document.getElementById("pdfTable");
-        items.forEach(({ key }) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-          <td>${key}</td>
-          <td><iframe src="/.netlify/functions/getPdf?key=${encodeURIComponent(
-            key
-          )}" width="400" height="300"></iframe></td>
-        `;
-          tbody.appendChild(row);
-        });
+        try {
+          const res = await fetch("/.netlify/functions/listPdfs");
+          if (!res.ok) throw new Error("Failed to load PDFs");
+          const items = await res.json();
+
+          const tbody = document.getElementById("pdfTable");
+          tbody.innerHTML = "";
+
+          items.forEach(({ filename, metadata, uploadDate }) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${filename}</td>
+              <td>${metadata?.patientId || "—"}</td>
+              <td>${new Date(uploadDate).toLocaleString()}</td>
+              <td>
+                <iframe src="/.netlify/functions/getPdf?filename=${encodeURIComponent(
+                  filename
+                )}" width="400" height="300"></iframe>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        } catch (err) {
+          alert("Error loading PDFs: " + err.message);
+        }
       }
       loadPdfs();
     </script>
