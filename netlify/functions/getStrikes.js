@@ -3,18 +3,10 @@ const { connectToDatabase } = require("./_mongodb");
 exports.handler = async (event) => {
   try {
     const { username } = event.queryStringParameters || {};
-    if (!username) {
-      return { statusCode: 400, body: "Missing username parameter" };
-    }
+    if (!username) return { statusCode: 400, body: "Missing username" };
 
     const db = await connectToDatabase();
-    const user = await db.collection("users").findOne({ username });
 
-    if (!user) return { statusCode: 404, body: "User not found" };
-
-    user._id = user._id.toString();
-
-    // Fetch strikes separately
     const strikes = await db
       .collection("strikes")
       .find({ username })
@@ -25,10 +17,10 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ...user, strikes }),
+      body: JSON.stringify(strikes),
     };
   } catch (err) {
-    console.error("Error in getUserProfile:", err);
+    console.error("Error in getStrikes:", err);
     return { statusCode: 500, body: "Internal Server Error" };
   }
 };
