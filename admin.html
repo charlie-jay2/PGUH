@@ -255,18 +255,24 @@
         users.forEach((u) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${escapeHtml(u.username)}</td>
-            <td>${escapeHtml(u.email || "")}</td>
-            <td>${escapeHtml(u.role)}</td>
-            <td>
-              <button onclick="resetPassword('${escapeJs(
-                u.username
-              )}', '${escapeJs(u.email || "")}')">Reset Password</button>
-              <button onclick="deleteUser('${escapeJs(
-                u.username
-              )}', '${escapeJs(u.email || "")}')">Delete</button>
-            </td>
-          `;
+        <td>
+          <a href="staffProfile.html?username=${encodeURIComponent(
+            u.username
+          )}">
+            ${escapeHtml(u.username)}
+          </a>
+        </td>
+        <td>${escapeHtml(u.email || "")}</td>
+        <td>${escapeHtml(u.role)}</td>
+        <td>
+          <button onclick="resetPassword('${escapeJs(u.username)}', '${escapeJs(
+            u.email || ""
+          )}')">Reset Password</button>
+          <button onclick="deleteUser('${escapeJs(u.username)}', '${escapeJs(
+            u.email || ""
+          )}')">Delete</button>
+        </td>
+      `;
           body.appendChild(tr);
         });
       }
@@ -345,7 +351,6 @@
 
       // SHIFT MANAGEMENT LOGIC
 
-      // Load shifts and populate table
       async function loadShifts() {
         if (!token) return;
         try {
@@ -360,7 +365,6 @@
         }
       }
 
-      // Populate shifts table
       function populateShifts(shifts) {
         const tbody = document.getElementById("shiftsBody");
         tbody.innerHTML = "";
@@ -371,22 +375,19 @@
           tr.dataset.shiftEnd = shift.shiftEnd;
 
           tr.innerHTML = `
-            <td>${escapeHtml(shift.staffName)}</td>
-            <td>${escapeHtml(shift.role)}</td>
-            <td>${formatDateTime(shift.shiftStart)}</td>
-            <td>${formatDateTime(shift.shiftEnd)}</td>
-            <td class="shift-status">Loading...</td>
-            <td><button onclick="deleteShift('${
-              shift._id
-            }')">Delete</button></td>
-          `;
+        <td>${escapeHtml(shift.staffName)}</td>
+        <td>${escapeHtml(shift.role)}</td>
+        <td>${formatDateTime(shift.shiftStart)}</td>
+        <td>${formatDateTime(shift.shiftEnd)}</td>
+        <td class="shift-status">Loading...</td>
+        <td><button onclick="deleteShift('${shift._id}')">Delete</button></td>
+      `;
 
           tbody.appendChild(tr);
         });
         updateShiftStatuses();
       }
 
-      // Format date/time nicely
       function formatDateTime(dateStr) {
         const d = new Date(dateStr);
         if (isNaN(d)) return "";
@@ -396,7 +397,6 @@
         });
       }
 
-      // Add new shift
       document
         .getElementById("createShiftBtn")
         .addEventListener("click", async () => {
@@ -440,7 +440,6 @@
           }
         });
 
-      // Delete shift
       window.deleteShift = async function (shiftId) {
         if (!confirm("Are you sure you want to delete this shift?")) return;
 
@@ -463,7 +462,6 @@
         }
       };
 
-      // Update shift status badges
       function updateShiftStatuses() {
         const now = new Date();
         const rows = document.querySelectorAll("#shiftsBody tr");
@@ -473,7 +471,7 @@
           const shiftEnd = new Date(row.dataset.shiftEnd);
           const statusCell = row.querySelector(".shift-status");
 
-          const diffToStart = (shiftStart - now) / (1000 * 60); // minutes
+          const diffToStart = (shiftStart - now) / (1000 * 60);
           const diffToEnd = (shiftEnd - now) / (1000 * 60);
 
           if (diffToStart <= 10 && diffToStart > 0) {
@@ -488,7 +486,6 @@
         });
       }
 
-      // Update shift statuses every minute
       setInterval(updateShiftStatuses, 60000);
 
       checkAccess();
