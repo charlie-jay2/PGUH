@@ -7,17 +7,3 @@
 # Node bundler
 [functions]
   node_bundler = "esbuild"
-
-# Redirect all function requests to notinuse.html
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/notinuse.html"
-  status = 302
-  force = true
-
-# Optional: redirect all other site requests to notinuse.html
-[[redirects]]
-  from = "/*"
-  to = "/notinuse.html"
-  status = 302
-  force = true
