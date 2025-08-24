@@ -1,9 +1,6 @@
 [build]
   publish = "."
 
-[build.environment]
-  NETLIFY_DEV_BINARY_MEDIA_TYPES = "application/pdf"
-
 # Node bundler
 [functions]
   node_bundler = "esbuild"
