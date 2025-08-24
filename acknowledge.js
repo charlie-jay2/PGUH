@@ -26,7 +26,10 @@ const termsLastUpdated = "24 August 2025";
         z-index: 9999;
       ">
         <strong>Policy Update</strong><br>
-        Our <a href="TOU.html" style="color: #ffdd57; text-decoration: underline;" target="_blank">Terms of Usage Policy</a> 
+        Our <a href="TOU.html" 
+               style="color: #ffdd57; text-decoration: underline;" 
+               target="_blank" 
+               rel="noopener noreferrer">Terms of Usage Policy</a> 
         has been updated. Please review the changes to ensure you continue to abide by them.<br><br>
         <button id="dismissNotice" style="
           background: #ffdd57;
