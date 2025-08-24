@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terms of Usage Policy</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <img src="./Assets/logo.png" class="logo" alt="Hospital Logo" />
+      <div class="brand">Prince Georges University Hospital</div>
+      <nav class="topnav">
+        <a href="index.html">Home</a>
+        <a href="cadmin.html">CAdmin</a>
+        <a href="careers.html">Careers</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>Terms of Usage Policy</h2>
+        <p>
+          This portal is intended for <strong>roleplay purposes only</strong>
+          and does not represent an official NHS system. By using this system,
+          you agree to comply with the following terms and conditions.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>1. Staff Accounts</h3>
+        <ul>
+          <li>
+            You are responsible for all activity carried out under your account.
+          </li>
+          <li>Account credentials must not be shared with others.</li>
+          <li>Accounts may be suspended or revoked if misused.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h3>2. Use of Patient Records</h3>
+        <ul>
+          <li>
+            All patient records are fictional and created for roleplay scenarios
+            only.
+          </li>
+          <li>
+            Patient records must be respectful, appropriate, and professional in
+            tone.
+          </li>
+          <li>
+            Do not create offensive, abusive, sexual, or inappropriate patient
+            records.
+          </li>
+          <li>
+            Do not impersonate real people, NHS staff, or real-life patients.
+          </li>
+          <li>
+            Information within the portal must not be shared outside of this
+            system.
+          </li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h3>3. Prohibited Behaviour</h3>
+        <ul>
+          <li>No harassment, bullying, threats, or abusive language.</li>
+          <li>No sexual, sexually suggestive, or NSFW content of any kind.</li>
+          <li>
+            No discriminatory, racist, sexist, or otherwise offensive behaviour.
+          </li>
+          <li>
+            No attempts to bypass security or access accounts without
+            permission.
+          </li>
+          <li>No disruption, spamming, or misuse of the service.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h3>4. Roleplay Disclaimer</h3>
+        <p>
+          This system is
+          <strong
+            >not connected to any real hospitals, the NHS, or any healthcare
+            provider</strong
+          >. All data is fictional and created for entertainment and training
+          purposes only. This portal must never be used for real healthcare
+          information.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>5. Enforcement</h3>
+        <ul>
+          <li>Moderators may review usage and patient records at any time.</li>
+          <li>
+            Violations may result in warnings, suspension, or permanent bans.
+          </li>
+          <li>
+            Serious breaches (e.g. security exploits) will be escalated and may
+            result in Roblox enforcement actions.
+          </li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h3>6. Changes to Terms</h3>
+        <p>
+          These Terms may be updated periodically. Continued use of the portal
+          means you agree to the latest version.
+        </p>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Copyright 2025 © Prince Georges University Hospital —
+          <a href="TOU.html">Terms of Usage</a>
+        </p>
+        <p>
+          This website is not an official National Health Service website. It is
+          for roleplay purposes only and not for real-life medical use.
+        </p>
+        <p id="lastUpdated"></p>
+      </footer>
+    </main>
+
+    <script>
+      // Auto update "Last Updated" footer
+      const lastUpdated = new Date().toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      document.getElementById("lastUpdated").textContent =
+        "Last Updated: " + lastUpdated;
+    </script>
+  </body>
+</html>
