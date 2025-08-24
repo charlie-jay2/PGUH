@@ -1,10 +1,23 @@
-[functions]
-  node_bundler = "esbuild"
-
-[[headers]]
-  for = "/.netlify/functions/uploadPdf"
-  [headers.values]
-  Content-Type = "application/pdf"
+[build]
+  publish = "."
 
 [build.environment]
   NETLIFY_DEV_BINARY_MEDIA_TYPES = "application/pdf"
+
+# Node bundler
+[functions]
+  node_bundler = "esbuild"
+
+# Redirect all function requests to notinuse.html
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/notinuse.html"
+  status = 302
+  force = true
+
+# Optional: redirect all other site requests to notinuse.html
+[[redirects]]
+  from = "/*"
+  to = "/notinuse.html"
+  status = 302
+  force = true

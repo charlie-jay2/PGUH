@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OFFLINE</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: monospace, Arial, sans-serif;
+        background: #0072c6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+        color: #fff;
+      }
+      .downtime-container {
+        max-width: 600px;
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      h1 {
+        font-size: 2rem;
+        color: #1d5fad;
+        letter-spacing: 2px;
+        min-height: 2.5rem;
+      }
+      p {
+        margin-top: 1rem;
+        font-size: 1.2rem;
+        color: #1d5fad;
+        min-height: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="downtime-container">
+      <h1 id="glitch-header"></h1>
+      <p id="glitch-paragraph"></p>
+    </div>
+
+    <script>
+      function scrambleText(element, text, speed = 40, callback = null) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?#$%&";
+        let frame = 0;
+        let revealed = 0;
+
+        function scramble() {
+          let displayed = "";
+
+          for (let i = 0; i < text.length; i++) {
+            if (i < revealed) {
+              displayed += text[i];
+            } else {
+              displayed += chars[Math.floor(Math.random() * chars.length)];
+            }
+          }
+
+          if (element.tagName === "TITLE") {
+            document.title = displayed;
+          } else {
+            element.textContent = displayed;
+          }
+
+          frame++;
+          if (frame % speed === 0 && revealed < text.length) {
+            revealed++;
+          }
+
+          if (revealed <= text.length) {
+            requestAnimationFrame(scramble);
+          } else if (callback) {
+            callback();
+          }
+        }
+
+        scramble();
+      }
+
+      const header = document.getElementById("glitch-header");
+      const paragraph = document.getElementById("glitch-paragraph");
+
+      scrambleText(header, "OFFLINE", 40);
+      scrambleText(paragraph, "This site is no longer in use.", 3);
+      scrambleText(document.querySelector("title"), "OFFLINE", 40);
+    </script>
+  </body>
+</html>
