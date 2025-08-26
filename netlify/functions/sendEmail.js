@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const path = require("path");
 
 exports.handler = async (event) => {
   try {
@@ -21,6 +22,7 @@ exports.handler = async (event) => {
     let subject = "";
     let intro = "";
     let detailsHtml = "";
+    let attachments = [];
 
     if (type === "account") {
       subject = "Your New NHS Staff Account";
@@ -62,6 +64,25 @@ exports.handler = async (event) => {
       detailsHtml = `
         <p>This is to inform you that your NHS Staff account with username <strong>${username}</strong> has been suspended.</p>
         <p>Please contact your administrator for further details or to appeal this decision.</p>`;
+    } else if (type === "termination") {
+      subject = "Termination of Employment – Prince George University Hospital";
+      intro = `
+        <p>Dear Mr Linson,</p>
+        <p>Please find attached formal documentation regarding the termination of your employment at Prince George University Hospital. The document outlines the specific reasons for this decision.</p>
+        <p>We appreciate that this outcome may be disappointing, and we wish to assure you that the decision was made following due process and careful consideration.</p>
+        <p>Should you have any questions or require further clarification, please do not hesitate to contact us via this email address. We will endeavour to respond to your enquiry as promptly as possible.</p>
+        <p>Yours sincerely,<br/>
+        Internal Affairs Team<br/>
+        Prince George University Hospital</p>
+      `;
+      detailsHtml = "";
+      attachments.push({
+        filename: "IA Report - Luis Linson.pdf",
+        path: path.resolve(
+          __dirname,
+          "../../Documents/PDFs/IA Report - Luis Linson.pdf"
+        ),
+      });
     }
 
     const htmlMessage = `
@@ -77,7 +98,6 @@ exports.handler = async (event) => {
           --muted: #6b6b6b;
           --bg: #f6f8fb;
           --panel: #ffffff;
-          --accent: #0072c6;
           --radius: 8px;
           font-family: "Frutiger", Arial, sans-serif;
         }
@@ -85,7 +105,6 @@ exports.handler = async (event) => {
           background-color: var(--bg);
           margin: 0;
           padding: 0;
-          font-family: "Frutiger", Arial, sans-serif;
         }
         .email-container {
           max-width: 600px;
@@ -106,6 +125,8 @@ exports.handler = async (event) => {
         .content {
           padding: 20px;
           color: #333;
+          font-size: 15px;
+          line-height: 1.6;
         }
         h1 {
           color: var(--nhs-dark);
@@ -117,9 +138,6 @@ exports.handler = async (event) => {
           padding: 15px;
           margin-top: 15px;
           font-size: 14px;
-        }
-        .details p {
-          margin: 5px 0;
         }
         .footer {
           text-align: center;
@@ -135,12 +153,11 @@ exports.handler = async (event) => {
           <img src="https://pguh.uk/Assets/Logo2.png" alt="NHS Logo" />
         </div>
         <div class="content">
-          <h1>${intro}</h1>
+          ${intro}
           ${detailsHtml}
-          <p style="margin-top: 15px;">Please do not share these details with anyone. If you did not request this change, contact your administrator immediately.</p>
         </div>
         <div class="footer">
-          &copy; ${new Date().getFullYear()} Prince Georges University Hospital — NHS Staff Portal
+          &copy; ${new Date().getFullYear()} Prince George University Hospital — NHS Staff Portal
         </div>
       </div>
     </body>
@@ -152,6 +169,7 @@ exports.handler = async (event) => {
       to,
       subject,
       html: htmlMessage,
+      attachments,
     });
 
     return {
