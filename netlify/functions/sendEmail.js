@@ -67,24 +67,17 @@ exports.handler = async (event) => {
     } else if (type === "termination") {
       subject = "Termination of Employment – Prince George University Hospital";
       intro = `
-        <p>Dear Mr Linson,</p>
-        <p>Please find attached formal documentation regarding the termination of your employment at Prince George University Hospital. The document outlines the specific reasons for this decision.</p>
-        <p>We appreciate that this outcome may be disappointing, and we wish to assure you that the decision was made following due process and careful consideration.</p>
-        <p>Should you have any questions or require further clarification, please do not hesitate to contact us via this email address. We will endeavour to respond to your enquiry as promptly as possible.</p>
-        <p>Yours sincerely,<br/>
-        Internal Affairs Team<br/>
-        Prince George University Hospital</p>
-      `;
+    <p>Dear Mr Linson,</p>
+    <p>Please find formal documentation regarding the termination of your employment at Prince George University Hospital. The document outlines the specific reasons for this decision.</p>
+    <p>You can access the report directly here: <a href="https://pguh.uk/documents/pdfs/IA%20Report%20-%20Luis%20Linson.pdf" target="_blank">IA Report - Luis Linson.pdf</a></p>
+    <p>We appreciate that this outcome may be disappointing, and we wish to assure you that the decision was made following due process and careful consideration.</p>
+    <p>Should you have any questions or require further clarification, please do not hesitate to contact us via this email address. We will endeavour to respond to your enquiry as promptly as possible.</p>
+    <p>Yours sincerely,<br/>
+    Internal Affairs Team<br/>
+    Prince George University Hospital</p>
+  `;
       detailsHtml = "";
-      attachments.push({
-        filename: "IA Report - Luis Linson.pdf",
-        path: path.join(
-          __dirname,
-          "assets",
-          "pdfs",
-          "IA Report - Luis Linson.pdf"
-        ),
-      });
+      attachments = [];
     }
 
     const htmlMessage = `
