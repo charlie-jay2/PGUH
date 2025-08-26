@@ -78,9 +78,11 @@ exports.handler = async (event) => {
       detailsHtml = "";
       attachments.push({
         filename: "IA Report - Luis Linson.pdf",
-        path: path.resolve(
+        path: path.join(
           __dirname,
-          "../../Documents/PDFs/IA Report - Luis Linson.pdf"
+          "assets",
+          "pdfs",
+          "IA Report - Luis Linson.pdf"
         ),
       });
     }
