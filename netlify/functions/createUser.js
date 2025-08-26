@@ -5,7 +5,6 @@ const { sendEmail } = require("./sendEmail");
 
 exports.handler = async (event) => {
   try {
-    // Verify token & get user from headers
     let authUser;
     try {
       authUser = verifyTokenFromHeaders(event.headers);
@@ -51,15 +50,14 @@ exports.handler = async (event) => {
 
     const hash = await bcrypt.hash(password, 10);
 
-    await db
-      .collection("staff")
-      .insertOne({
-        username,
-        password: hash,
-        role,
-        email,
-        createdAt: new Date(),
-      });
+    await db.collection("staff").insertOne({
+      username,
+      password: hash,
+      role,
+      email,
+      suspended: false,
+      createdAt: new Date(),
+    });
 
     await sendEmail(email, username, password, "account");
 
@@ -67,7 +65,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: `User ${username} created and email sent`,
+        message: `User ${username} created (suspended=false) and email sent`,
       }),
     };
   } catch (err) {
