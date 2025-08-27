@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document Library</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- your NHS style.css -->
+  </head>
+  <body>
+    <div class="container">
+      <div class="panel">
+        <h2>Document Library</h2>
+
+        <!-- Search bar styled like patient controls -->
+        <div class="patient-controls">
+          <input type="text" id="search" placeholder="Search documents..." />
+        </div>
+
+        <!-- Styled table -->
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Document Name</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="docs-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer">
+      © 2025 Prince George University Hospital — Document Portal
+    </footer>
+
+    <script>
+      // JSON data embedded
+      const docs = [
+        {
+          name: "How to Use",
+          path: "/Documents/PDFs/HowToUse.pdf",
+        },
+        {
+          name: "IA Report - Luis Linson",
+          path: "/Documents/PDFs/IA Report - Luis Linson.pdf",
+        },
+      ];
+
+      const tableBody = document.getElementById("docs-body");
+      const searchInput = document.getElementById("search");
+
+      function render(filter = "") {
+        tableBody.innerHTML = "";
+        docs
+          .filter((d) => d.name.toLowerCase().includes(filter.toLowerCase()))
+          .forEach((d) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${d.name}</td>
+            <td><a href="${d.path}" target="_blank">Open</a></td>
+          `;
+            tableBody.appendChild(row);
+          });
+      }
+
+      searchInput.addEventListener("input", () => render(searchInput.value));
+      render();
+    </script>
+  </body>
+</html>
