@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Newsroom | Hospital Trust</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .topbar {
+        background-color: var(--nhs-blue);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s ease;
+        padding: 18px 0;
+      }
+
+      .topbar .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.4s ease;
+      }
+
+      .topbar.shrink {
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 12px;
+        margin-top: 10px;
+      }
+
+      .topbar.shrink .container {
+        max-width: 950px;
+      }
+
+      .logo {
+        height: 60px;
+        width: auto;
+        transition: all 0.3s ease;
+      }
+
+      .topbar.shrink .logo {
+        height: 42px;
+        width: auto;
+      }
+
+      body {
+        margin: 0;
+        padding-top: 90px;
+        background: var(--bg);
+        color: #111;
+        line-height: 1.4;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+      }
+
+      .blog-card {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .blog-image {
+        width: 100%;
+        height: auto;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+
+      .blog-content {
+        padding: 20px;
+      }
+
+      .blog-content h2 {
+        margin-top: 0;
+        color: var(--nhs-dark);
+        font-size: 1.3rem;
+      }
+
+      .blog-content p {
+        color: #444;
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+
+      .no-articles {
+        text-align: center;
+        color: var(--muted);
+        font-size: 1.2rem;
+        grid-column: 1 / -1;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar" id="navbar">
+      <div class="container">
+        <img src="Assets/Logo2.png" alt="Trust Logo" class="logo" />
+        <nav class="topnav">
+          <a href="index.html">Home</a>
+          <a href="newsroom.html">Newsroom</a>
+          <a href="careers.html">Careers</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="panel" style="text-align: center; margin-top: 40px">
+      <h1
+        style="color: var(--nhs-blue); font-size: 2.2rem; margin-bottom: 12px"
+      >
+        Newsroom
+      </h1>
+      <p
+        style="
+          max-width: 700px;
+          margin: 0 auto;
+          color: var(--muted);
+          font-size: 1.1rem;
+        "
+      >
+        Stay updated with the latest stories, updates, and insights from our
+        Trust.
+      </p>
+    </section>
+
+    <main class="container" style="margin-top: 30px">
+      <div class="blog-grid" id="blogGrid">
+        <!-- Example article (remove or add dynamically)
+        <article class="blog-card panel">
+          <img
+            src="https://placehold.co/600x300"
+            alt="Blog Feature"
+            class="blog-image"
+          />
+          <div class="blog-content">
+            <h2>Improving Patient Care with Innovation</h2>
+            <p>
+              Our Trust is pioneering new approaches in healthcare delivery,
+              ensuring every patient receives the highest standard of care.
+              Learn more about our initiatives…
+            </p>
+            <a href="blogs/post.html" class="btn-apply">Read More</a>
+          </div>
+        </article>
+        -->
+      </div>
+    </main>
+
+    <footer class="footer">
+      Copyright 2025 © Prince George University Hospital
+    </footer>
+    <footer class="footer">
+      This website is not an official National Health Service website, this is
+      just for roleplay purposes and do not intend for real life usage.
+    </footer>
+    <footer class="footer">
+      <a href="./TOU.html">Terms of Usage Policy</a>
+    </footer>
+
+    <script>
+      window.addEventListener("scroll", function () {
+        const navbar = document.getElementById("navbar");
+        if (window.scrollY > 50) {
+          navbar.classList.add("shrink");
+        } else {
+          navbar.classList.remove("shrink");
+        }
+      });
+
+      window.addEventListener("DOMContentLoaded", function () {
+        const blogGrid = document.getElementById("blogGrid");
+        const articles = blogGrid.querySelectorAll(".blog-card");
+        if (articles.length === 0) {
+          const today = new Date().toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+          blogGrid.innerHTML = `<p class="no-articles">No articles available as of ${today}</p>`;
+        }
+      });
+    </script>
+  </body>
+</html>
