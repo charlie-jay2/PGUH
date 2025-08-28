@@ -165,15 +165,15 @@
           <td style="max-width: 280px; overflow-wrap: break-word;">${scenarioHtml}</td>
           <td>
             <button onclick="updateApplicationStatus('${app._id}', 'Accepted')"
-              style="background: var(--stat-value-green); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+              style="display: block; width: 100%; background: var(--nhs-blue); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 5px;">
               Accept
             </button>
             <button onclick="updateApplicationStatus('${app._id}', 'Denied')"
-              style="background: var(--stat-value-red); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+              style="display: block; width: 100%; background: var(--nhs-blue); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 5px;">
               Deny
             </button>
             <button onclick="deleteApplication('${app._id}')"
-              style="background: grey; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              style="display: block; width: 100%; background: grey; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
               Delete
             </button>
           </td>
