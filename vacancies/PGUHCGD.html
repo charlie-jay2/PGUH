@@ -38,7 +38,7 @@
             Email:
             <input
               type="email"
-              name="robloxProfile"
+              name="email"
               required
               placeholder="johndoe@gmail.com"
             />
@@ -95,32 +95,35 @@
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        // Gather form values
         const formData = new FormData(form);
 
-        // Prepare data object for the API
+        // Grab values safely
+        const robloxProfileInput = formData.get("robloxProfile"); // optional Roblox link
+        const emailInput = formData.get("email");
+
         const data = {
-          robloxName: formData.get("robloxName").trim(),
-          discordUsername: formData.get("discordUsername").trim(),
-          robloxProfileLink: formData.get("robloxProfile").trim(),
+          robloxName: (formData.get("robloxName") || "").trim(),
+          discordUsername: (formData.get("discordUsername") || "").trim(),
+          // Use Roblox profile link if provided, otherwise fallback to email
+          robloxProfileLink: robloxProfileInput
+            ? robloxProfileInput.trim()
+            : emailInput.trim(),
+          email: emailInput ? emailInput.trim() : "",
           roleApplied: "Contractor | Game Developer",
-          motivation: formData.get("whyApply").trim(),
-          standOut: formData.get("standOut").trim(),
-          experience: formData.get("experience").trim(),
+          motivation: (formData.get("whyApply") || "").trim(),
+          standOut: (formData.get("standOut") || "").trim(),
+          experience: (formData.get("experience") || "").trim(),
           scenarioAnswers: {
-            scenario1: formData.get("scenario1").trim(),
-            scenario2: formData.get("scenario2").trim(),
-            scenario3: formData.get("scenario3").trim(),
+            scenario1: (formData.get("scenario1") || "").trim(),
+            scenario2: (formData.get("scenario2") || "").trim(),
+            scenario3: (formData.get("scenario3") || "").trim(),
           },
         };
 
         try {
           const response = await fetch("/.netlify/functions/sendResponse", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
           });
 
