@@ -1,6 +1,5 @@
 const { connectToDatabase } = require("./_mongodb");
 const { verifyTokenFromHeaders } = require("./_auth");
-const { sendEmail } = require("./sendEmail");
 
 exports.handler = async (event) => {
   try {
@@ -50,8 +49,26 @@ exports.handler = async (event) => {
       };
     }
 
-    // Send email notification about deletion (no password needed here)
-    await sendEmail(email, username, "", "deleted");
+    // 🔹 Call the sendEmail Netlify function
+    const sendEmailRes = await fetch(
+      `${
+        process.env.URL || "http://localhost:8888"
+      }/.netlify/functions/sendEmail`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: email,
+          username,
+          type: "deleted",
+        }),
+      }
+    );
+
+    if (!sendEmailRes.ok) {
+      const errText = await sendEmailRes.text();
+      console.error("Email error (deleteUser):", errText);
+    }
 
     return {
       statusCode: 200,

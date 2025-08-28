@@ -1,7 +1,6 @@
 const { connectToDatabase } = require("./_mongodb");
 const { verifyTokenFromHeaders } = require("./_auth");
 const bcrypt = require("bcryptjs");
-const { sendEmail } = require("./sendEmail");
 
 exports.handler = async (event) => {
   try {
@@ -59,7 +58,27 @@ exports.handler = async (event) => {
       createdAt: new Date(),
     });
 
-    await sendEmail(email, username, password, "account");
+    // 🔹 Call the sendEmail Netlify function
+    const sendEmailRes = await fetch(
+      `${
+        process.env.URL || "http://localhost:8888"
+      }/.netlify/functions/sendEmail`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: email,
+          username,
+          content: password,
+          type: "account",
+        }),
+      }
+    );
+
+    if (!sendEmailRes.ok) {
+      const errText = await sendEmailRes.text();
+      console.error("Email error (createUser):", errText);
+    }
 
     return {
       statusCode: 200,

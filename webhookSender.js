@@ -56,7 +56,7 @@ async function sendWebhook(postName, postLink, imageUrl) {
     };
 
     const payload = {
-      username: "Newsroom Bot",
+      username: "https://pguh.uk/newsroom",
       embeds: [embed],
     };
 
